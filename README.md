@@ -103,9 +103,3 @@ PORT=3000
 cd frontend
 npm run build
 ```
-
-## 👥 Контакты
-
-- **Телефон**: +7 (910) 177-52-52
-- **Email**: cyber_dogg@gmail.com
-
