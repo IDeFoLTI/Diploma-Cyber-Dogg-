@@ -81,6 +81,9 @@
             <button type="submit" class="reservation-btn" :disabled="isSubmitting">
               {{ isSubmitting ? 'Отправка...' : 'Забронировать' }}
             </button>
+
+            <p v-if="submitSuccess" class="success-message">Заявка успешно отправлена! Мы свяжемся с вами.</p>
+            <p v-if="submitError" class="error-message-global">{{ submitError }}</p>
           </form>
         </div>
       </div>
@@ -90,6 +93,8 @@
 
 <script setup>
 import { ref, reactive } from 'vue';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const formData = reactive({
   phone: '',
@@ -106,6 +111,8 @@ const errors = reactive({
 });
 
 const isSubmitting = ref(false);
+const submitSuccess = ref(false);
+const submitError = ref('');
 
 const validateForm = () => {
   let isValid = true;
@@ -115,6 +122,7 @@ const validateForm = () => {
   errors.datetime = '';
   errors.hall = '';
   errors.players = '';
+  submitError.value = '';
   
   // Валидация телефона - простая проверка на минимальную длину
   if (!formData.phone.trim()) {
@@ -156,20 +164,49 @@ const validateForm = () => {
   return isValid;
 };
 
-const submitForm = () => {
-  if (validateForm()) {
-    isSubmitting.value = true;
-    // Здесь будет логика отправки формы
-    console.log('Form submitted:', formData);
+const submitForm = async () => {
+  if (!validateForm()) return;
+
+  isSubmitting.value = true;
+  submitSuccess.value = false;
+  submitError.value = '';
+
+  try {
+    const response = await fetch(`${API_URL}/api/reservation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        phone: formData.phone,
+        datetime: formData.datetime,
+        hall: formData.hall,
+        players: Number(formData.players)
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      submitError.value = data.message || 'Ошибка при отправке заявки';
+      return;
+    }
+
+    submitSuccess.value = true;
+    // Очистка формы
+    formData.phone = '';
+    formData.datetime = '';
+    formData.hall = '';
+    formData.players = '';
+
     setTimeout(() => {
-      isSubmitting.value = false;
-      alert('Заявка успешно отправлена!');
-      // Очистка формы
-      formData.phone = '';
-      formData.datetime = '';
-      formData.hall = '';
-      formData.players = '';
-    }, 1000);
+      submitSuccess.value = false;
+    }, 5000);
+  } catch (err) {
+    console.error('Submit error:', err);
+    submitError.value = 'Не удалось подключиться к серверу';
+  } finally {
+    isSubmitting.value = false;
   }
 };
 </script>
@@ -344,6 +381,22 @@ const submitForm = () => {
   font-size: var(--font-xs);
   color: var(--c-danger);
   margin-top: 4px;
+}
+
+.success-message {
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-sm);
+  color: #4caf50;
+  text-align: center;
+  margin-top: var(--spacing-sm);
+}
+
+.error-message-global {
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-sm);
+  color: var(--c-danger);
+  text-align: center;
+  margin-top: var(--spacing-sm);
 }
 
 .reservation-btn {

@@ -6,12 +6,14 @@
 ### Frontend
 - **Vue 3** (Composition API, `<script setup>`)
 - **Vite** — сборка и dev-сервер
-- **Vue Router** — маршрутизация
+- **Vue Router** — маршрутизация с защитой роутов
 - **CSS3** — кастомные стили с CSS-переменными
 
 ### Backend
 - **Fastify** — Node.js фреймворк
 - **MySQL** — база данных
+- **EmailJS** — отправка email без SMTP
+- **reservations.json** — хранение бронирований
 
 
 ### Frontend
@@ -41,27 +43,30 @@ cyber-dogg/
 │   │   │   ├── header/       # Компоненты шапки
 │   │   │   ├── footer/       # Компоненты подвала
 │   │   │   ├── homepage/     # Компоненты главной страницы
-│   │   │   ├── CertificateBlock.vue
-│   │   │   ├── CertificateOptions.vue
-│   │   │   └── TemplateButton.vue
+│   │   │   ├── TemplateButton.vue
+│   │   │   └── CertificateBlock.vue
 │   │   ├── views/            # Страницы приложения
 │   │   │   ├── Home.vue
 │   │   │   ├── Login.vue
 │   │   │   ├── Register.vue
-│   │   │   ├── ForgotPassword.vue
-│   │   │   ├── ResetPassword.vue
-│   │   │   └── GiftCertificates.vue
-│   │   ├── assets/           # Шрифты, изображения
-│   │   ├── public/           # Статические файлы
-│   │   ├── App.vue           # Корневой компонент
+│   │   │   ├── Profile.vue
+│   │   │   ├── AdminPanel.vue  # Админ-панель
+│   │   │   └── ...
+│   │   ├── router/           # Маршрутизация
 │   │   ├── main.js           # Точка входа
 │   │   └── styles.css        # Глобальные стили
 │   ├── package.json
 │   └── vite.config.js
 └── backend/
-    ├── src/
-    ├── package.json
-    └── .env.example
+    ├── controllers/          # Контроллеры
+    ├── routes/               # API маршруты
+    ├── services/             # Бизнес-логика
+    ├── models/               # Модели БД
+    ├── repositories/         # Работа с БД
+    ├── server.js             # Точка входа
+    ├── db.js                 # Конфигурация БД
+    ├── reservations.json     # Хранение бронирований
+    └── .env                  # Переменные окружения
 ```
 
 
@@ -71,15 +76,16 @@ cyber-dogg/
 - **Подарочные сертификаты** — выбор типа сертификата и опций
 - **Авторизация/Регистрация** — вход, регистрация, восстановление пароля
 - **Личный кабинет** — профиль пользователя
+- **Админ-панель** — управление бронированиями и пользователями (только для admin)
 
-### Формы с валидацией
-Все формы включают клиентскую валидацию:
-- ✅ Проверка обязательных полей
-- ✅ Валидация email
-- ✅ Проверка телефона (минимум 10 цифр)
-- ✅ Проверка пароля (минимум 6 символов)
-- ✅ Визуальная обратная связь (красная обводка, сообщения об ошибках)
-- ✅ Блокировка кнопок до заполнения формы
+### Админ-панель
+- ✅ Просмотр всех бронирований
+- ✅ Удаление бронирований
+- ✅ Просмотр пользователей
+- ✅ Добавление игрового времени (в разработке)
+- ✅ Активация сертификатов (в разработке)
+- ✅ Управление аккаунтами (в разработке)
+
 
 ### Подарочные сертификаты
 - 4 типа сертификатов (Common room, Battle Arena, VIP room, PlayStation)
@@ -96,7 +102,17 @@ DB_USER=root
 DB_PASSWORD=your_password
 DB_NAME=cyber_dogg
 PORT=3000
+
+# EmailJS (уже настроено)
+EMAILJS_SERVICE_ID=service_ctrd0i9
+EMAILJS_TEMPLATE_ID=template_z6s4j67
+EMAILJS_PUBLIC_KEY=YyNDL10cpIcLaZL1U
+TO_EMAIL=broken.halo000000@gmail.com
 ```
+
+### Тестовые пользователи
+- **Админ:** `admin` / `admin111`
+- **Обычный пользователь:** создать через регистрацию
 
 
 ```bash

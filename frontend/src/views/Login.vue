@@ -34,13 +34,13 @@
 
           <div class="form-buttons">
             <div class="button-column">
-              <TemplateButton variant="outlined-white" @click="goToRegister">
+              <TemplateButton variant="outlined-white" @click="goToRegister" :disabled="isSubmitting">
                 Регистрация
               </TemplateButton>
             </div>
             <div class="button-column">
               <TemplateButton variant="outlined-white" @click="handleLogin" :disabled="!canSubmit">
-                Вход
+                {{ isSubmitting ? 'Вход...' : 'Вход' }}
               </TemplateButton>
               <button class="forgot-link" @click="goToForgotPassword">
                 Восстановление пароля
@@ -55,13 +55,15 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import SiteFooter from '../components/footer/SiteFooter.vue';
 import TemplateButton from '../components/TemplateButton.vue';
 
 const router = useRouter();
 const logoUrl = '/img/logo.svg';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const formData = reactive({
   username: '',
@@ -73,8 +75,10 @@ const errors = reactive({
   password: ''
 });
 
+const isSubmitting = ref(false);
+
 const canSubmit = computed(() => {
-  return formData.username.trim() && formData.password.trim();
+  return formData.username.trim() && formData.password.trim() && !isSubmitting.value;
 });
 
 const validateForm = () => {
@@ -95,11 +99,52 @@ const validateForm = () => {
   return isValid;
 };
 
-const handleLogin = () => {
+const handleLogin = async () => {
   if (validateForm()) {
-    console.log('Вход:', formData);
-    // TODO: Отправка данных на сервер
-    router.push('/profile');
+    isSubmitting.value = true;
+    errors.username = '';
+    errors.password = '';
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          errors.password = 'Неверный логин или пароль';
+        } else if (data.message) {
+          errors.password = data.message;
+        } else {
+          errors.password = 'Ошибка при входе';
+        }
+        return;
+      }
+
+      // Сохраняем данные пользователя
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Переход в профиль или админ панель
+      if (data.user.role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/profile');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      errors.password = 'Не удалось подключиться к серверу';
+    } finally {
+      isSubmitting.value = false;
+    }
   }
 };
 

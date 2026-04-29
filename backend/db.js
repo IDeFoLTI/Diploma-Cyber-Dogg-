@@ -12,7 +12,7 @@ export const db = mysql.createPool({
   host: DB_HOST || "localhost",
   port: Number(DB_PORT || 3306),
   user: DB_USER || "root",
-  password: DB_PASSWORD || "",
+  password: DB_PASSWORD || "iopkloU54",
   database: DB_NAME || "cyber_dogg",
   waitForConnections: true,
   connectionLimit: 10,

@@ -59,11 +59,11 @@
           </div>
 
           <div class="form-buttons">
-            <TemplateButton variant="outlined-white" @click="goToLogin">
+            <TemplateButton variant="outlined-white" @click="goToLogin" :disabled="isSubmitting">
               Вход
             </TemplateButton>
             <TemplateButton variant="outlined-white" @click="handleRegister" :disabled="!canSubmit">
-              Регистрация
+              {{ isSubmitting ? 'Регистрация...' : 'Регистрация' }}
             </TemplateButton>
           </div>
         </form>
@@ -74,13 +74,15 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import SiteFooter from '../components/footer/SiteFooter.vue';
 import TemplateButton from '../components/TemplateButton.vue';
 
 const router = useRouter();
 const logoUrl = '/img/logo.svg';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const formData = reactive({
   email: '',
@@ -96,8 +98,10 @@ const errors = reactive({
   password: ''
 });
 
+const isSubmitting = ref(false);
+
 const canSubmit = computed(() => {
-  return formData.email.trim() && formData.username.trim() && formData.phone.trim() && formData.password.trim();
+  return formData.email.trim() && formData.username.trim() && formData.phone.trim() && formData.password.trim() && !isSubmitting.value;
 });
 
 const validateForm = () => {
@@ -139,11 +143,59 @@ const validateForm = () => {
   return isValid;
 };
 
-const handleRegister = () => {
+const handleRegister = async () => {
   if (validateForm()) {
-    console.log('Регистрация:', formData);
-    // TODO: Отправка данных на сервер
-    router.push('/profile');
+    isSubmitting.value = true;
+    errors.email = '';
+    errors.username = '';
+    errors.phone = '';
+    errors.password = '';
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          username: formData.username,
+          phone: formData.phone,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 409) {
+          if (data.error === 'EMAIL_ALREADY_EXISTS') {
+            errors.email = 'Пользователь с таким email уже существует';
+          } else if (data.error === 'USERNAME_ALREADY_EXISTS') {
+            errors.username = 'Пользователь с таким логином уже существует';
+          }
+        } else if (data.message) {
+          // Распределяем ошибки по полям
+          if (data.message.includes('email')) errors.email = data.message;
+          else if (data.message.includes('логин')) errors.username = data.message;
+          else errors.password = data.message;
+        } else {
+          errors.password = 'Ошибка при регистрации';
+        }
+        return;
+      }
+
+      // Сохраняем данные пользователя
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Переход в профиль
+      router.push('/profile');
+    } catch (err) {
+      console.error('Register error:', err);
+      errors.password = 'Не удалось подключиться к серверу';
+    } finally {
+      isSubmitting.value = false;
+    }
   }
 };
 
