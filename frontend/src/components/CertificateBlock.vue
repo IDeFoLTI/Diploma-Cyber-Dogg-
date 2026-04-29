@@ -20,12 +20,14 @@
         v-model:hours="selectedHours"
         v-model:package="selectedPackage"
         :unique-id="cert.id"
+        @submit="handleStandardSubmit"
       />
       <PlaystationOptions 
         v-else
         v-model:players="selectedPlayers"
         v-model:hours="selectedHours"
         :unique-id="cert.id"
+        @submit="handlePlaystationSubmit"
       />
     </div>
   </div>
@@ -43,10 +45,30 @@ const props = defineProps({
   }
 });
 
+const emit = defineEmits(['submit']);
+
 const selectedTime = ref(null);
 const selectedHours = ref(null);
 const selectedPackage = ref(null);
 const selectedPlayers = ref(null);
+
+const handleStandardSubmit = (data) => {
+  emit('submit', {
+    certId: props.cert.id,
+    certTitle: props.cert.title,
+    type: 'standard',
+    ...data
+  });
+};
+
+const handlePlaystationSubmit = (data) => {
+  emit('submit', {
+    certId: props.cert.id,
+    certTitle: props.cert.title,
+    type: 'playstation',
+    ...data
+  });
+};
 </script>
 
 <style scoped>

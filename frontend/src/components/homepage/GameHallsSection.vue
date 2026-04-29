@@ -87,6 +87,7 @@ const rooms = [
   flex-direction: column;
   align-items: center;
   width: 100%;
+  overflow-x: hidden;
 }
 
 .container {
@@ -96,38 +97,6 @@ const rooms = [
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.game-halls__title {
-  font-family: "Bowler", sans-serif;
-  font-size: var(--font-2xl);
-  font-weight: 400;
-  color: var(--c-white);
-  text-align: center;
-  margin: 0 0 var(--spacing-lg) 0;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  position: relative;
-  line-height: 1.2;
-}
-
-.game-halls__title::after {
-  content: "";
-  display: block;
-  width: clamp(60px, 10vw, 100px);
-  height: 3px;
-  background: var(--c-accent);
-  margin: 20px auto 0;
-  border-radius: 2px;
-}
-
-.game-halls__list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-  align-items: center;
-  justify-content: center;
-  width: 100%;
 }
 
 /* Адаптивность для десктопов */

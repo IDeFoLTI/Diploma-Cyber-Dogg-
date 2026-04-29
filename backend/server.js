@@ -8,6 +8,7 @@ import { authRoutes, userRoutes } from "./routes/userRoutes.js";
 import { reservationRoutes } from "./routes/reservationRoutes.js";
 import { adminRoutes } from "./routes/adminRoutes.js";
 import { gameTimeRoutes } from "./routes/gameTimeRoutes.js";
+import { certificateRoutes } from "./routes/certificateRoutes.js";
 
 const app = Fastify({ logger: true });
 
@@ -66,6 +67,11 @@ const start = async () => {
     console.log("🔄 Registering game time routes...");
     gameTimeRoutes(app);
     console.log("✅ Game time routes registered");
+    
+    // Подключаем роуты сертификатов
+    console.log("🔄 Registering certificate routes...");
+    certificateRoutes(app);
+    console.log("✅ Certificate routes registered");
     
     // Инициализация БД
     console.log("🔄 Initializing database...");

@@ -39,6 +39,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
+  overflow-x: hidden;
 }
 
 .sale-container {
@@ -80,11 +81,25 @@
   align-items: stretch;
   flex-wrap: wrap;
   gap: var(--spacing-xl);
-  width: fit-content;
+  width: 100%;
   margin: 0 auto;
 }
 
+/* Адаптивность для экранов 400-600px */
+@media (min-width: 400px) and (max-width: 600px) {
+  .sale-blocks {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .sale-block {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}
+
 .sale-block {
+  width: 100%;
   min-width: 280px;
   max-width: 500px;
   display: flex;
@@ -194,7 +209,7 @@
   .sale-block {
     width: 100%;
     max-width: 100%;
-    min-width: 100%;
+    min-width: auto;
     padding: var(--spacing-md);
   }
 
@@ -213,12 +228,43 @@
     padding: var(--spacing-sm) 0;
   }
 
+  .sale-container {
+    padding: 0 var(--spacing-sm);
+  }
+
   .sale-title {
     font-size: clamp(20px, 5vw, 22px);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .sale-title::after {
+    margin: 15px auto 0;
+  }
+
+  .sale-blocks {
+    gap: var(--spacing-sm);
+  }
+
+  .sale-block {
+    padding: var(--spacing-sm);
   }
 
   .sale-percent {
-    font-size: clamp(40px, 14vw, 55px);
+    font-size: clamp(35px, 12vw, 45px);
+  }
+
+  .sale-conditions-small {
+    font-size: 11px;
+    padding-top: 3px;
+  }
+
+  .sale-title-text {
+    font-size: clamp(14px, 3.5vw, 18px);
+    padding-top: 8px;
+  }
+
+  .sale-top-row {
+    gap: var(--spacing-sm);
   }
 }
 </style>

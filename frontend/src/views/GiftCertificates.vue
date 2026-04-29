@@ -7,7 +7,7 @@
         
         <div class="certs-wrapper">
           <div v-for="cert in certificateTypes" :key="cert.id" class="cert-block">
-            <CertificateBlock :cert="cert" />
+            <CertificateBlock :cert="cert" @submit="handleCertificateSubmit" />
           </div>
         </div>
       </div>
@@ -17,9 +17,12 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
 import SiteHeader from '../components/header/SiteHeader.vue';
 import SiteFooter from '../components/footer/SiteFooter.vue';
 import CertificateBlock from '../components/CertificateBlock.vue';
+
+const router = useRouter();
 
 const standartSert = "/img/standartSert.svg";
 const battleArenaSert = "/img/battleArenaSert.svg";
@@ -32,6 +35,22 @@ const certificateTypes = [
   { id: 'vip', title: 'VIP room', image: vipSert, isReversed: false, type: 'standard' },
   { id: 'playstation', title: 'PlayStation', image: playstationSert, isReversed: true, type: 'playstation' }
 ];
+
+const handleCertificateSubmit = (data) => {
+  // Переход на страницу покупки с предзаполненными данными
+  router.push({
+    path: '/buy-certificate',
+    query: {
+      hall: data.certId,
+      hallTitle: data.certTitle,
+      type: data.type,
+      ...(data.type === 'standard' 
+        ? { time: data.time, hours: data.hours, package: data.package }
+        : { players: data.players, hours: data.hours }
+      )
+    }
+  });
+};
 </script>
 
 <style scoped>

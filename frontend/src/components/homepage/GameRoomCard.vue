@@ -57,7 +57,7 @@ defineProps({
 <style scoped>
 .room-card {
   width: 100%;
-  max-width: 1300px;
+  max-width: 100%;
   height: auto;
   display: flex;
   align-items: center;
@@ -65,6 +65,31 @@ defineProps({
   overflow: hidden;
   padding: var(--spacing-md);
   border-radius: 20px;
+  box-sizing: border-box;
+}
+
+/* Адаптивность для экранов 400-900px */
+@media (min-width: 400px) and (max-width: 900px) {
+  .room-card {
+    padding: var(--spacing-sm);
+  }
+
+  .room-card__image-wrapper {
+    width: 100%;
+    max-width: 400px;
+    height: 350px;
+  }
+
+  .room-card__image-wrapper--small {
+    width: 100%;
+    max-width: 350px;
+    height: 300px;
+  }
+
+  .room-card__content {
+    width: 100%;
+    padding: var(--spacing-md);
+  }
 }
 
 .room-card--reverse {

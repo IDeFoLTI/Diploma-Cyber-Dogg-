@@ -28,5 +28,6 @@ import GiftCertificates from "../components/homepage/GiftCertificates.vue";
   background: var(--c-bg);
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 </style>

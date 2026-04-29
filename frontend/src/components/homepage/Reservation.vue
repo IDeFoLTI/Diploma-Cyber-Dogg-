@@ -52,13 +52,14 @@
                 <select 
                   id="hall" 
                   v-model="formData.hall"
-                  class="form-input" 
+                  class="form-input form-select" 
                   :class="{ 'input-error': errors.hall }"
                 >
                   <option value="" disabled>Выберите зал</option>
-                  <option value="hall-1">Зал 1</option>
-                  <option value="hall-2">Зал 2</option>
-                  <option value="hall-3">Зал 3</option>
+                  <option value="common_room">Common Room</option>
+                  <option value="battle_arena">Battle Arena</option>
+                  <option value="vip_room">VIP Room</option>
+                  <option value="playstation">PlayStation</option>
                 </select>
                 <span v-if="errors.hall" class="error-message">{{ errors.hall }}</span>
               </div>
@@ -150,6 +151,9 @@ const validateForm = () => {
   if (!formData.hall) {
     errors.hall = 'Выберите зал';
     isValid = false;
+  } else if (!['common_room', 'battle_arena', 'vip_room', 'playstation'].includes(formData.hall)) {
+    errors.hall = 'Выберите корректный зал';
+    isValid = false;
   }
   
   // Валидация количества игроков
@@ -171,6 +175,14 @@ const submitForm = async () => {
   submitSuccess.value = false;
   submitError.value = '';
 
+  // Преобразование значения зала для email
+  const hallLabels = {
+    'common_room': 'Common Room',
+    'battle_arena': 'Battle Arena',
+    'vip_room': 'VIP Room',
+    'playstation': 'PlayStation'
+  };
+
   try {
     const response = await fetch(`${API_URL}/api/reservation`, {
       method: 'POST',
@@ -180,7 +192,7 @@ const submitForm = async () => {
       body: JSON.stringify({
         phone: formData.phone,
         datetime: formData.datetime,
-        hall: formData.hall,
+        hall: hallLabels[formData.hall] || formData.hall,
         players: Number(formData.players)
       })
     });
@@ -220,6 +232,7 @@ const submitForm = async () => {
   align-items: center;
   justify-content: center;
   width: 100%;
+  overflow-x: hidden;
 }
 
 .reservation-container {
@@ -268,6 +281,22 @@ const submitForm = async () => {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+}
+
+/* Адаптивность для экранов 380-700px */
+@media (min-width: 380px) and (max-width: 700px) {
+  .reservation-info {
+    min-width: 100%;
+  }
+
+  .reservation-form-wrapper {
+    min-width: 100%;
+  }
+
+  .reservation-content {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 .reservation-text {
@@ -345,6 +374,20 @@ const submitForm = async () => {
   padding: var(--spacing-sm) var(--spacing-md);
   outline: none;
   transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.form-select {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.form-select option {
+  background: var(--c-bg);
+  color: var(--c-white);
+  padding: 8px;
 }
 
 .form-input:focus {
@@ -506,6 +549,33 @@ const submitForm = async () => {
   }
 }
 
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 380px) {
+  .reservation-container {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .reservation-form-wrapper {
+    min-width: auto;
+    max-width: 100%;
+  }
+
+  .reservation-info {
+    min-width: auto;
+    max-width: 100%;
+  }
+
+  .form-input {
+    font-size: var(--font-sm);
+    padding: var(--spacing-sm);
+  }
+
+  .reservation-btn {
+    font-size: var(--font-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+}
+
 /* Адаптивность для маленьких мобильных */
 @media (max-width: 480px) {
   .reservation-section {
@@ -514,11 +584,6 @@ const submitForm = async () => {
 
   .reservation-title {
     font-size: clamp(20px, 5vw, 22px);
-  }
-
-  .form-input {
-    font-size: var(--font-sm);
-    padding: var(--spacing-sm);
   }
 
   .reservation-btn {

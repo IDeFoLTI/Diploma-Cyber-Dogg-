@@ -42,6 +42,11 @@ const routes = [
     component: () => import('../views/GiftCertificates.vue')
   },
   {
+    path: '/buy-certificate',
+    name: 'buy-certificate',
+    component: () => import('../views/BuyCertificate.vue')
+  },
+  {
     path: '/profile',
     name: 'profile',
     component: () => import('../views/Profile.vue'),

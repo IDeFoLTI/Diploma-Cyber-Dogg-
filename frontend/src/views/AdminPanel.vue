@@ -36,6 +36,12 @@
         >
           Пользователи
         </button>
+        <button 
+          :class="['tab', { active: activeTab === 'certificates' }]"
+          @click="activeTab = 'certificates'; loadCertificates()"
+        >
+          Сертификаты
+        </button>
       </div>
 
       <!-- Секция пользователей -->
@@ -76,6 +82,59 @@
               Добавить время
             </button>
           </div>
+        </div>
+      </div>
+
+      <!-- Секция сертификатов -->
+      <div v-if="activeTab === 'certificates'" class="admin-section">
+        <h2>Заказы сертификатов</h2>
+        
+        <div v-if="loading" class="loading">Загрузка...</div>
+        
+        <div v-else-if="error" class="error">{{ error }}</div>
+        
+        <div v-else-if="certificates.length === 0" class="empty">
+          Нет заказов сертификатов
+        </div>
+        
+        <div v-else class="certificates-table">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Промокод</th>
+                <th>Зал</th>
+                <th>Опции</th>
+                <th>Телефон</th>
+                <th>Цена</th>
+                <th>Статус</th>
+                <th>Дата</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="cert in certificates" :key="cert.id">
+                <td>{{ cert.id }}</td>
+                <td class="promo-code-cell">{{ cert.promo_code }}</td>
+                <td>{{ formatHall(cert.hall) }}</td>
+                <td>{{ formatOptions(cert) }}</td>
+                <td>{{ cert.phone }}</td>
+                <td>{{ cert.price }} ₽</td>
+                <td>
+                  <select 
+                    :value="cert.status" 
+                    @change="updateCertificateStatus(cert.id, $event.target.value)"
+                    class="status-select"
+                  >
+                    <option value="pending">Ожидает</option>
+                    <option value="paid">Оплачен</option>
+                    <option value="used">Использован</option>
+                    <option value="cancelled">Отменён</option>
+                  </select>
+                </td>
+                <td>{{ formatDate(cert.created_at) }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -120,8 +179,22 @@
     <div v-if="showActivateCertModal" class="modal-overlay" @click="showActivateCertModal = false">
       <div class="modal" @click.stop>
         <h3>Активировать сертификат</h3>
-        <p class="modal-desc">Функция в разработке</p>
-        <button class="modal-close" @click="showActivateCertModal = false">Закрыть</button>
+        <div class="modal-form">
+          <div class="form-group">
+            <label>Промокод *</label>
+            <input v-model="activateCertForm.promoCode" type="text" placeholder="10-значный промокод" maxlength="10" />
+          </div>
+          <div class="form-group">
+            <label>Телефон пользователя *</label>
+            <input v-model="activateCertForm.phone" type="tel" placeholder="+7 (XXX) XXX-XX-XX" />
+          </div>
+          <div class="modal-buttons">
+            <button class="modal-cancel" @click="showActivateCertModal = false">Отмена</button>
+            <button class="modal-confirm" @click="activateCertificate">Активировать</button>
+          </div>
+          <div v-if="activateCertError" class="modal-error">{{ activateCertError }}</div>
+          <div v-if="activateCertSuccess" class="modal-success">{{ activateCertSuccess }}</div>
+        </div>
       </div>
     </div>
 
@@ -197,6 +270,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const router = useRouter();
 const activeTab = ref('users');
 const users = ref([]);
+const certificates = ref([]);
 const loading = ref(false);
 const error = ref('');
 
@@ -233,6 +307,14 @@ const deleteUserForm = ref({
 const deleteUserError = ref('');
 const deleteUserSuccess = ref('');
 
+// Форма активации сертификата
+const activateCertForm = ref({
+  promoCode: '',
+  phone: ''
+});
+const activateCertError = ref('');
+const activateCertSuccess = ref('');
+
 // Проверка доступа
 onMounted(() => {
   const userStr = localStorage.getItem('user');
@@ -240,13 +322,13 @@ onMounted(() => {
     router.push('/login');
     return;
   }
-
+  
   const user = JSON.parse(userStr);
   if (user.role !== 'admin') {
     router.push('/profile');
     return;
   }
-
+  
   loadUsers();
 });
 
@@ -339,6 +421,100 @@ async function addTimeToUser() {
     }, 2000);
   } catch (err) {
     addTimeError.value = err.message;
+  }
+}
+
+async function loadCertificates() {
+  loading.value = true;
+  error.value = '';
+
+  try {
+    const userStr = localStorage.getItem('user');
+    const user = JSON.parse(userStr);
+
+    const response = await fetch(`${API_URL}/api/certificates/orders`, {
+      headers: {
+        'X-User': encodeURIComponent(JSON.stringify(user))
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login');
+        return;
+      }
+      throw new Error('Не удалось загрузить сертификаты');
+    }
+
+    const data = await response.json();
+    certificates.value = data.orders || [];
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    loading.value = false;
+  }
+}
+
+function formatHall(hall) {
+  const halls = {
+    'standart': 'Common Room',
+    'battle': 'Battle Arena',
+    'vip': 'VIP Room',
+    'playstation': 'PlayStation'
+  };
+  return halls[hall] || hall;
+}
+
+function formatOptions(cert) {
+  const options = [];
+  if (cert.time_type) {
+    options.push(cert.time_type === 'day' ? 'День' : 'Вечер');
+  }
+  if (cert.hours) {
+    options.push(cert.hours === '3hours' ? '3ч' : '5ч');
+  }
+  if (cert.package_type) {
+    options.push(cert.package_type === 'cyberday' ? 'Кибер сутки' : 'Ночь');
+  }
+  return options.join(', ') || '-';
+}
+
+function formatStatus(status) {
+  const statuses = {
+    'pending': 'Ожидает',
+    'paid': 'Оплачен',
+    'used': 'Использован',
+    'cancelled': 'Отменён'
+  };
+  return statuses[status] || status;
+}
+
+async function updateCertificateStatus(id, newStatus) {
+  try {
+    const userStr = localStorage.getItem('user');
+    const admin = JSON.parse(userStr);
+
+    const response = await fetch(`${API_URL}/api/admin/certificates/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User': encodeURIComponent(JSON.stringify(admin))
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
+
+    if (!response.ok) {
+      throw new Error('Не удалось обновить статус');
+    }
+
+    // Обновить локальный список
+    const index = certificates.value.findIndex(c => c.id === id);
+    if (index !== -1) {
+      certificates.value[index].status = newStatus;
+    }
+  } catch (err) {
+    console.error('Update status error:', err);
+    alert('Не удалось обновить статус');
   }
 }
 
@@ -436,6 +612,68 @@ async function deleteUser() {
   } catch (err) {
     deleteUserError.value = err.message;
   }
+}
+
+async function activateCertificate() {
+  activateCertError.value = '';
+  activateCertSuccess.value = '';
+  
+  if (!activateCertForm.value.promoCode || !activateCertForm.value.phone) {
+    activateCertError.value = 'Заполните все поля';
+    return;
+  }
+  
+  if (activateCertForm.value.promoCode.length !== 10) {
+    activateCertError.value = 'Промокод должен быть 10 символов';
+    return;
+  }
+  
+  try {
+    const userStr = localStorage.getItem('user');
+    const admin = JSON.parse(userStr);
+
+    const response = await fetch(`${API_URL}/api/admin/certificates/activate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User': encodeURIComponent(JSON.stringify(admin))
+      },
+      body: JSON.stringify({
+        promoCode: activateCertForm.value.promoCode.toUpperCase(),
+        phone: activateCertForm.value.phone
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Не удалось активировать сертификат');
+    }
+
+    activateCertSuccess.value = `Сертификат активирован! Добавлено ${data.addedTime.hours}ч в ${formatHallShort(data.addedTime.hall)} для ${data.user.username}`;
+    
+    setTimeout(() => {
+      activateCertForm.value = { promoCode: '', phone: '' };
+      activateCertSuccess.value = '';
+      showActivateCertModal.value = false;
+    }, 3000);
+  } catch (err) {
+    activateCertError.value = err.message;
+  }
+}
+
+function formatHallShort(hall) {
+  const halls = {
+    'common_room_day': 'Common Room (день)',
+    'common_room_night': 'Common Room (ночь)',
+    'battle_arena_day': 'Battle Arena (день)',
+    'battle_arena_night': 'Battle Arena (ночь)',
+    'vip_room_day': 'VIP Room (день)',
+    'vip_room_night': 'VIP Room (ночь)',
+    'playstation_under_5': 'PlayStation (до 5)',
+    'playstation_under_7': 'PlayStation (до 7)'
+  };
+  return halls[hall] || hall;
 }
 </script>
 
@@ -859,6 +1097,103 @@ select option {
 
 .modal-close:hover {
   background: rgba(0, 140, 209, 0.8);
+}
+
+/* Таблица сертификатов */
+.certificates-table {
+  overflow-x: auto;
+}
+
+.certificates-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.certificates-table th,
+.certificates-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.certificates-table th {
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-sm);
+  color: var(--c-white);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.certificates-table td {
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-sm);
+  color: var(--c-white);
+}
+
+.certificates-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.promo-code-cell {
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-md);
+  color: var(--c-accent);
+  letter-spacing: 2px;
+  font-weight: bold;
+}
+
+.status-select {
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  color: var(--c-white);
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.status-select:focus {
+  border-color: var(--c-accent);
+}
+
+.status-select option {
+  background: var(--c-bg);
+  color: var(--c-white);
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: var(--font-xs);
+  font-weight: 500;
+  font-family: "Roboto", sans-serif;
+  text-transform: uppercase;
+}
+
+.status-pending {
+  background: rgba(241, 196, 15, 0.2);
+  color: #f1c40f;
+}
+
+.status-paid {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+}
+
+.status-used {
+  background: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+}
+
+.status-cancelled {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
 }
 
 /* Адаптивность */

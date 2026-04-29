@@ -50,6 +50,7 @@ const burgerImage = '/img/burgerCafe.png';
   align-items: center;
   justify-content: center;
   width: 100%;
+  overflow-x: hidden;
 }
 
 .cafe-section__title {
@@ -137,6 +138,7 @@ const burgerImage = '/img/burgerCafe.png';
 .cafe-text-paragraph {
   font-family: "Roboto", sans-serif;
   font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+  font-weight: 600;
   color: var(--c-white);
   line-height: 1.6;
   text-align: left;

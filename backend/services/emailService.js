@@ -30,40 +30,14 @@ function saveReservationToFile(data) {
 }
 
 /**
- * Отправить письмо через EmailJS API
+ * Отправить письмо о бронировании
  */
 export async function sendReservationEmail({ phone, datetime, hall, players }) {
-  const hallNames = {
-    "hall-1": "Зал 1",
-    "hall-2": "Зал 2",
-    "hall-3": "Зал 3",
-  };
-
-  const reservationData = {
-    phone,
-    datetime,
-    hall: hallNames[hall] || hall,
-    players,
-  };
-
-  // Всегда сохраняем в файл
-  saveReservationToFile(reservationData);
-
-  // Проверяем настроен ли EmailJS
+  // Проверяем, настроен ли EmailJS
   if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
-    console.log("📧 EmailJS not configured — reservation saved to file only");
-    console.log("=".repeat(50));
-    console.log("Reservation details:");
-    console.log("Phone:", phone);
-    console.log("Datetime:", datetime);
-    console.log("Hall:", hallNames[hall] || hall);
-    console.log("Players:", players);
-    console.log("=".repeat(50));
-    console.log("💡 To enable email: set EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID in backend/.env");
-    return { 
-      mock: true, 
-      message: "Reservation saved to file (EmailJS not configured)" 
-    };
+    console.warn("⚠️ EmailJS not configured, saving to file instead");
+    saveReservationToFile({ phone, datetime, hall, players });
+    return { success: true, mock: true };
   }
 
   // Отправляем через EmailJS
@@ -82,8 +56,9 @@ export async function sendReservationEmail({ phone, datetime, hall, players }) {
           from_name: "Cyber Dogg Reservation Form",
           phone: phone,
           datetime: datetime,
-          hall: hallNames[hall] || hall,
+          hall: hall,
           players: players,
+          message: `Телефон: ${phone}\nВремя: ${datetime}\nЗал: ${hall}\nИгроков: ${players}`,
         },
       }),
     });
@@ -102,6 +77,7 @@ export async function sendReservationEmail({ phone, datetime, hall, players }) {
 
     if (!response.ok) {
       console.error("❌ EmailJS error:", response.status, responseText);
+      saveReservationToFile({ phone, datetime, hall, players });
       return { 
         mock: true, 
         message: "Reservation saved to file (EmailJS failed)" 
@@ -117,9 +93,68 @@ export async function sendReservationEmail({ phone, datetime, hall, players }) {
     };
   } catch (err) {
     console.error("❌ EmailJS request failed:", err.message);
+    saveReservationToFile({ phone, datetime, hall, players });
     return { 
       mock: true, 
       message: "Reservation saved to file (EmailJS request failed)" 
     };
   }
 }
+
+/**
+ * Отправить письмо с подтверждением сертификата
+ */
+export async function sendCertificateEmail({
+  to,
+  recipientName,
+  hall,
+  timeType,
+  hours,
+  packageType,
+  price,
+  orderId
+}) {
+  // Проверяем, настроен ли EmailJS
+  if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
+    console.warn("⚠️ EmailJS not configured for certificate email");
+    return { success: true, mock: true };
+  }
+
+  try {
+    const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        service_id: EMAILJS_SERVICE_ID,
+        template_id: EMAILJS_TEMPLATE_ID,
+        user_id: EMAILJS_PUBLIC_KEY,
+        template_params: {
+          to_email: to,
+          recipient_name: recipientName,
+          hall: hall,
+          time_type: timeType,
+          hours: hours,
+          package_type: packageType,
+          price: price,
+          order_id: orderId,
+        },
+      }),
+    });
+
+    const responseText = await response.text();
+    
+    if (responseText.trim() === "OK" || response.ok) {
+      console.log("✅ Certificate email sent successfully via EmailJS");
+      return { sent: true };
+    }
+
+    console.error("❌ EmailJS certificate email error:", response.status, responseText);
+    return { sent: false, message: "EmailJS failed" };
+  } catch (err) {
+    console.error("❌ EmailJS certificate email request failed:", err.message);
+    return { sent: false, message: "EmailJS request failed" };
+  }
+}
+

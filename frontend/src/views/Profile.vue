@@ -21,6 +21,9 @@
               <span class="info-label">Телефон:</span>
               <span class="info-value">{{ user.phone }}</span>
             </div>
+            <button class="reset-password-btn" @click="goToResetPassword">
+              Восстановить пароль
+            </button>
           </div>
           
           <!-- Баланс игрового времени -->
@@ -90,10 +93,6 @@
               </div>
             </div>
           </div>
-          
-          <button class="reset-password-btn" @click="goToResetPassword">
-            Восстановить пароль
-          </button>
           
           <button class="logout-btn" @click="handleLogout">
             Выйти
@@ -361,7 +360,11 @@ const goToResetPassword = () => {
   letter-spacing: 0.1em;
   cursor: pointer;
   transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
-  align-self: center;
+}
+
+.reset-password-btn {
+  width: 100%;
+  margin-top: var(--spacing-md);
 }
 
 .reset-password-btn:hover,

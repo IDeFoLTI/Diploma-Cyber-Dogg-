@@ -42,6 +42,7 @@ const giftImage = "/img/sert.svg";
   align-items: center;
   justify-content: center;
   width: 100%;
+  overflow-x: hidden;
 }
 
 .gift-container {
@@ -86,6 +87,24 @@ const giftImage = "/img/sert.svg";
   margin-bottom: var(--spacing-xl);
 }
 
+/* Адаптивность для экранов 400-700px */
+@media (min-width: 400px) and (max-width: 700px) {
+  .gift-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .gift-text {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .gift-image-wrapper {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}
+
 .gift-text {
   flex: 1;
   min-width: 300px;
@@ -97,6 +116,7 @@ const giftImage = "/img/sert.svg";
 .gift-description {
   font-family: "Roboto", sans-serif;
   font-size: var(--font-lg);
+  font-weight: 600;
   color: var(--c-white);
   line-height: 1.8;
   text-align: left;
@@ -226,6 +246,23 @@ const giftImage = "/img/sert.svg";
   .gift-description {
     font-size: var(--font-xs);
     line-height: 1.6;
+  }
+
+  .gift-button :deep(.template-btn) {
+    min-width: 280px;
+    padding: var(--spacing-md) var(--spacing-lg) !important;
+  }
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 400px) {
+  .gift-button :deep(.template-btn) {
+    min-width: 260px;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+  }
+
+  .gift-button :deep(.template-btn__text) {
+    font-size: 14px !important;
   }
 }
 </style>

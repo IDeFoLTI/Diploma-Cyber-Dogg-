@@ -38,11 +38,23 @@ const images = [
 .marquee-container {
   position: relative;
   width: 100%;
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
   height: clamp(400px, 50vh, 650px);
   overflow: hidden;
   background: var(--c-bg);
+  overflow-x: hidden;
+}
+
+/* Адаптивность для экранов >= 400px */
+@media (min-width: 400px) and (max-width: 1200px) {
+  .marquee-container {
+    height: clamp(300px, 45vh, 500px);
+  }
+
+  .marquee-img {
+    max-width: 400px;
+  }
 }
 
 .marquee-track {

@@ -312,6 +312,37 @@
           </div>
         </div>
       </div>
+
+      <!-- Расписание работы клуба -->
+      <div class="price-block schedule-block">
+        <div class="hall-header">
+          <span class="hall-name">Расписание работы клуба</span>
+        </div>
+        <div class="price-tables schedule-tables">
+          <table class="price-table">
+            <thead>
+              <tr>
+                <th>Период</th>
+                <th>Время работы</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>ДЕНЬ</td>
+                <td>08:00 — 15:00</td>
+              </tr>
+              <tr>
+                <td>ВЕЧЕР</td>
+                <td>15:00 — 22:00</td>
+              </tr>
+              <tr>
+                <td>НОЧЬ</td>
+                <td>22:00 — 08:00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <SiteFooter />
   </div>
@@ -454,6 +485,51 @@ import SiteFooter from '../components/footer/SiteFooter.vue';
   text-align: left;
 }
 
+/* Расписание работы клуба */
+.schedule-block {
+  background: var(--c-bg);
+  border: 2px solid var(--c-white);
+  border-radius: 15px;
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-3xl);
+}
+
+.schedule-block .hall-name {
+  font-family: "Bowler", sans-serif;
+  font-size: clamp(26px, 2.5vw, 30px);
+  font-weight: 400;
+  color: var(--c-white);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.schedule-tables {
+  display: block;
+  width: 100%;
+}
+
+.schedule-tables .price-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.schedule-tables .price-table th {
+  font-family: "Bowler", sans-serif !important;
+  font-size: clamp(18px, 3vw, 24px);
+  font-weight: 400;
+  color: var(--c-white);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--spacing-sm);
+}
+
+.schedule-tables .price-table td {
+  font-family: "Bowler", sans-serif !important;
+  font-size: clamp(16px, 3vw, 20px);
+  color: var(--c-white);
+}
+
 .price-section {
   margin-bottom: var(--spacing-xl);
 }
@@ -533,7 +609,11 @@ import SiteFooter from '../components/footer/SiteFooter.vue';
   }
 
   .price-info-item {
-    font-size: clamp(14px, 2.5vw, 18px);
+    font-size: clamp(12px, 2.5vw, 16px);
+  }
+
+  .schedule-block {
+    padding: var(--spacing-md);
   }
 }
 
