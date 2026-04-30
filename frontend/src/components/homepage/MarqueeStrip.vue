@@ -38,7 +38,7 @@ const images = [
 .marquee-container {
   position: relative;
   width: 100%;
-  max-width: 100%;
+  max-width: 1600px;
   margin: 0 auto;
   height: clamp(400px, 50vh, 650px);
   overflow: hidden;

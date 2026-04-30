@@ -99,6 +99,29 @@ const rooms = [
   align-items: center;
 }
 
+.game-halls__title {
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-2xl);
+  font-weight: 400;
+  color: var(--c-white);
+  text-align: center;
+  margin: 0 0 var(--spacing-xl) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  position: relative;
+  line-height: 1.2;
+}
+
+.game-halls__title::after {
+  content: "";
+  display: block;
+  width: clamp(60px, 10vw, 100px);
+  height: 3px;
+  background: var(--c-accent);
+  margin: 20px auto 0;
+  border-radius: 2px;
+}
+
 /* Адаптивность для десктопов */
 @media (min-width: 1400px) {
   .game-halls {
@@ -107,6 +130,10 @@ const rooms = [
 
   .game-halls__title {
     font-size: clamp(36px, 5vw, 52px);
+  }
+
+  .game-halls__title::after {
+    width: 100px;
   }
 }
 
@@ -119,6 +146,11 @@ const rooms = [
   .game-halls__title {
     font-size: clamp(28px, 4vw, 34px);
     margin-bottom: var(--spacing-md);
+  }
+
+  .game-halls__title::after {
+    width: 80px;
+    margin: 18px auto 0;
   }
 
   .game-halls__list {
@@ -138,13 +170,14 @@ const rooms = [
     letter-spacing: 0.08em;
   }
 
-  .game-halls__list {
-    gap: var(--spacing-sm);
+  .game-halls__title::after {
+    width: 60px;
+    height: 2px;
+    margin: 15px auto 0;
   }
 
-  .game-halls__title::after {
-    width: 50px;
-    margin: 15px auto 0;
+  .game-halls__list {
+    gap: var(--spacing-sm);
   }
 
   .container {
@@ -161,6 +194,12 @@ const rooms = [
   .game-halls__title {
     font-size: clamp(20px, 4.5vw, 22px);
     margin-bottom: var(--spacing-xs);
+  }
+
+  .game-halls__title::after {
+    width: 50px;
+    height: 2px;
+    margin: 12px auto 0;
   }
 
   .game-halls__list {
@@ -182,6 +221,7 @@ const rooms = [
   .game-halls__title::after {
     width: 40px;
     height: 2px;
+    margin: 10px auto 0;
   }
 }
 </style>

@@ -4,6 +4,7 @@ import "dotenv/config";
 import { db } from "./db.js";
 import { createUserTable } from "./models/User.js";
 import { createUserTimeTable } from "./models/UserTime.js";
+import { createCertificateOrdersTable } from "./models/CertificateOrder.js";
 import { authRoutes, userRoutes } from "./routes/userRoutes.js";
 import { reservationRoutes } from "./routes/reservationRoutes.js";
 import { adminRoutes } from "./routes/adminRoutes.js";
@@ -76,7 +77,11 @@ const start = async () => {
     // Инициализация БД
     console.log("🔄 Initializing database...");
     await db.query(createUserTable);
+    console.log("✅ Users table initialized");
     await db.query(createUserTimeTable);
+    console.log("✅ User game time table initialized");
+    await db.query(createCertificateOrdersTable);
+    console.log("✅ Certificate orders table initialized");
     console.log("✅ Database initialized");
     
     // Запуск сервера
