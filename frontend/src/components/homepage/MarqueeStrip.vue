@@ -1,15 +1,15 @@
 <template>
   <div class="marquee-container">
-    <div class="marquee-track">
+    <div class="marquee-track" ref="trackRef">
       <div class="marquee-content">
         <img v-for="(img, index) in images" :key="index" :src="img" alt="" class="marquee-img" />
       </div>
       <div class="marquee-content">
         <img v-for="(img, index) in images" :key="`dup1-${index}`" :src="img" alt="" class="marquee-img" />
       </div>
-      <div class="marquee-content">
+       <div class="marquee-content">
         <img v-for="(img, index) in images" :key="`dup2-${index}`" :src="img" alt="" class="marquee-img" />
-      </div>
+       </div>
     </div>
     <div class="marquee-overlay">
       <div class="marquee-content-wrapper">
@@ -25,6 +25,7 @@
 </template>
 
 <script setup>
+import { onMounted, onUnmounted, ref, nextTick } from 'vue'
 import TemplateButton from '../TemplateButton.vue';
 
 const images = [
@@ -32,18 +33,137 @@ const images = [
   '/img/image 7.png',
   '/img/image 8.png'
 ];
+
+const trackRef = ref(null);
+let animationId = null;
+let position = 0;
+let lastTimestamp = null;
+let contentWidth = 0;
+
+const SPEED = 20;
+
+// Функция точного расчёта ширины
+const updateWidth = () => {
+  const track = trackRef.value;
+  if (!track) return;
+  
+  const contents = track.querySelectorAll('.marquee-content');
+  if (contents.length >= 2) {
+    // Берём ширину первого блока с изображениями
+    const width = contents[0].getBoundingClientRect().width;
+    if (width > 0 && width !== contentWidth) {
+      contentWidth = width;
+      // Сбрасываем позицию при изменении ширины
+      position = 0;
+      if (track) {
+        track.style.transform = `translateX(0px)`;
+      }
+    }
+  }
+};
+
+onMounted(async () => {
+  const track = trackRef.value;
+  if (!track) return;
+  
+  // Ждём полной загрузки DOM
+  await nextTick();
+  
+  // Функция запуска анимации после загрузки всех изображений
+  const startAnimation = () => {
+    const allImages = track.querySelectorAll('img');
+    if (allImages.length === 0) {
+      updateWidth();
+      startAnimate();
+      return;
+    }
+    
+    let loadedCount = 0;
+    const checkAllLoaded = () => {
+      loadedCount++;
+      if (loadedCount === allImages.length) {
+        // Небольшая задержка для корректного расчёта ширины
+        setTimeout(() => {
+          updateWidth();
+          startAnimate();
+        }, 50);
+      }
+    };
+    
+    allImages.forEach(img => {
+      if (img.complete && img.naturalWidth > 0) {
+        checkAllLoaded();
+      } else {
+        img.addEventListener('load', checkAllLoaded);
+        img.addEventListener('error', checkAllLoaded);
+      }
+    });
+  };
+  
+  // Запуск анимации
+  const startAnimate = () => {
+    if (animationId) cancelAnimationFrame(animationId);
+    lastTimestamp = null;
+    animationId = requestAnimationFrame(animate);
+  };
+  
+  function animate(timestamp) {
+    if (!lastTimestamp) {
+      lastTimestamp = timestamp;
+      animationId = requestAnimationFrame(animate);
+      return;
+    }
+    
+    // Расчёт дельты с ограничением
+    let delta = (timestamp - lastTimestamp) / 1000;
+    if (delta > 0.1) delta = 0.033;
+    
+    // Двигаем позицию
+    position += SPEED * delta;
+    
+    // Сброс позиции когда она превышает ширину контента
+    if (contentWidth > 0) {
+      while (position >= contentWidth) {
+        position -= contentWidth;
+      }
+    }
+    
+    // Применяем трансформацию
+    if (track) {
+      track.style.transform = `translateX(-${position}px)`;
+    }
+    
+    lastTimestamp = timestamp;
+    animationId = requestAnimationFrame(animate);
+  }
+  
+  startAnimation();
+  
+  // Пересчёт при изменении размера окна
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      updateWidth();
+    }, 150);
+  });
+  
+  onUnmounted(() => {
+    if (animationId) cancelAnimationFrame(animationId);
+    window.removeEventListener('resize', updateWidth);
+  });
+});
 </script>
 
 <style scoped>
 .marquee-container {
   position: relative;
   width: 100%;
-  max-width: 1600px;
+  max-width: 1400px;
   margin: 0 auto;
   height: clamp(400px, 50vh, 650px);
   overflow: hidden;
   background: var(--c-bg);
-  overflow-x: hidden;
 }
 
 /* Адаптивность для экранов >= 400px */
@@ -60,7 +180,9 @@ const images = [
 .marquee-track {
   display: flex;
   height: 100%;
+  width: fit-content;
   will-change: transform;
+  /* Убираем CSS-анимацию, используем JS */
 }
 
 .marquee-content {
@@ -79,19 +201,6 @@ const images = [
 
 .marquee-img:last-child {
   margin-right: 0;
-}
-
-.marquee-track {
-  animation: marqueeScroll 40s linear infinite;
-}
-
-@keyframes marqueeScroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-33.333%);
-  }
 }
 
 .marquee-overlay {
