@@ -48,6 +48,12 @@
           Меню
         </button>
         <button 
+          :class="['tab', { active: activeTab === 'products' }]"
+          @click="activeTab = 'products'"
+        >
+          Каталог
+        </button>
+        <button 
           :class="['tab', { active: activeTab === 'prices' }]"
           @click="activeTab = 'prices'"
         >
@@ -152,6 +158,11 @@
       <!-- Секция меню -->
       <div v-if="activeTab === 'menu'" class="admin-section">
         <MenuManagement />
+      </div>
+
+      <!-- Секция каталога -->
+      <div v-if="activeTab === 'products'" class="admin-section">
+        <ProductManagement />
       </div>
 
       <!-- Секция цен залов -->
@@ -287,6 +298,7 @@ import SiteHeader from '../components/header/SiteHeader.vue';
 import SiteFooter from '../components/footer/SiteFooter.vue';
 import MenuManagement from '../components/MenuManagement.vue';
 import PriceManagement from '../components/PriceManagement.vue';
+import ProductManagement from '../components/ProductManagement.vue';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 

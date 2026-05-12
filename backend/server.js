@@ -1,5 +1,8 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import multipart from "@fastify/multipart";
+import fastifyStatic from "@fastify/static";
+import fs from "fs";
 import "dotenv/config";
 import { db } from "./db.js";
 import { createUserTable } from "./models/User.js";
@@ -36,6 +39,30 @@ const start = async () => {
     });
     console.log("✅ CORS registered");
     
+    // Регистрируем загрузку файлов и статические ресурсы
+    const uploadsPath = new URL('./uploads', import.meta.url);
+    if (!fs.existsSync(uploadsPath)) {
+      fs.mkdirSync(uploadsPath, { recursive: true });
+    }
+    const productsUploadsPath = new URL('./uploads/products', import.meta.url);
+    if (!fs.existsSync(productsUploadsPath)) {
+      fs.mkdirSync(productsUploadsPath, { recursive: true });
+    }
+
+    await app.register(multipart, {
+      attachFieldsToBody: false,
+      limits: {
+        files: 3,
+        fieldNameSize: 100,
+        fileSize: 10 * 1024 * 1024
+      }
+    });
+
+    await app.register(fastifyStatic, {
+      root: uploadsPath,
+      prefix: '/uploads/',
+    });
+
     // Инициализация БД ПЕРЕД роутами
     console.log("🔄 Initializing database...");
     await db.query(createUserTable);

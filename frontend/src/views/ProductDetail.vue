@@ -36,7 +36,23 @@
         <div class="product-image-section">
           <div class="product-image-wrapper">
             <div class="product-main-image">
-              <span class="image-placeholder">{{ product.name }}</span>
+              <img
+                v-if="currentImage"
+                :src="currentImage"
+                :alt="product.name"
+              />
+              <span v-else class="image-placeholder">{{ product.name }}</span>
+            </div>
+            <div v-if="product.images?.length > 1" class="product-thumbnails">
+              <button
+                v-for="(image, index) in product.images"
+                :key="index"
+                :class="['thumbnail-button', { active: selectedImageIndex === index }]"
+                type="button"
+                @click="selectedImageIndex = index"
+              >
+                <img :src="image" :alt="product.name" />
+              </button>
             </div>
           </div>
         </div>
@@ -96,6 +112,12 @@ const router = useRouter();
 const product = ref(null);
 const loading = ref(true);
 const error = ref(null);
+const selectedImageIndex = ref(0);
+
+const currentImage = computed(() => {
+  if (!product.value) return null;
+  return product.value.images?.[selectedImageIndex.value] || product.value.image || null;
+});
 
 const productId = computed(() => {
   return parseInt(route.params.id);
@@ -270,6 +292,40 @@ const addToCart = () => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.product-main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-thumbnails {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.thumbnail-button {
+  width: 72px;
+  height: 72px;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  padding: 0;
+}
+
+.thumbnail-button.active {
+  border-color: var(--c-accent);
+}
+
+.thumbnail-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .image-placeholder {

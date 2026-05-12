@@ -2,6 +2,7 @@
  * Роуты для сертификатов
  */
 import { generateUniquePromoCode } from "../utils/promoCodeGenerator.js";
+import { authenticateAdmin } from "../middleware/auth.js";
 
 export async function certificateRoutes(app) {
   // Создать заказ на сертификат
@@ -61,21 +62,7 @@ export async function certificateRoutes(app) {
 
   // Получить все заказы (админка)
   app.get("/api/certificates/orders", {
-    preHandler: async (request, reply) => {
-      const userStr = request.headers["x-user"];
-      if (!userStr) {
-        return reply.status(401).send({ error: "UNAUTHORIZED" });
-      }
-      try {
-        const user = JSON.parse(decodeURIComponent(userStr));
-        if (user.role !== "admin") {
-          return reply.status(403).send({ error: "FORBIDDEN" });
-        }
-        request.user = user;
-      } catch (err) {
-        return reply.status(401).send({ error: "UNAUTHORIZED" });
-      }
-    },
+    preHandler: authenticateAdmin,
   }, async (request, reply) => {
     try {
       const { db } = await import("../db.js");
@@ -94,21 +81,7 @@ export async function certificateRoutes(app) {
 
   // Обновить статус сертификата (админка)
   app.patch("/api/admin/certificates/:id/status", {
-    preHandler: async (request, reply) => {
-      const userStr = request.headers["x-user"];
-      if (!userStr) {
-        return reply.status(401).send({ error: "UNAUTHORIZED" });
-      }
-      try {
-        const user = JSON.parse(decodeURIComponent(userStr));
-        if (user.role !== "admin") {
-          return reply.status(403).send({ error: "FORBIDDEN" });
-        }
-        request.user = user;
-      } catch (err) {
-        return reply.status(401).send({ error: "UNAUTHORIZED" });
-      }
-    },
+    preHandler: authenticateAdmin,
   }, async (request, reply) => {
     try {
       const id = parseInt(request.params.id);
@@ -158,21 +131,7 @@ export async function certificateRoutes(app) {
 
   // Активировать промокод (админка)
   app.post("/api/admin/certificates/activate", {
-    preHandler: async (request, reply) => {
-      const userStr = request.headers["x-user"];
-      if (!userStr) {
-        return reply.status(401).send({ error: "UNAUTHORIZED" });
-      }
-      try {
-        const user = JSON.parse(decodeURIComponent(userStr));
-        if (user.role !== "admin") {
-          return reply.status(403).send({ error: "FORBIDDEN" });
-        }
-        request.user = user;
-      } catch (err) {
-        return reply.status(401).send({ error: "UNAUTHORIZED" });
-      }
-    },
+    preHandler: authenticateAdmin,
   }, async (request, reply) => {
     try {
       const { promoCode, phone } = request.body;

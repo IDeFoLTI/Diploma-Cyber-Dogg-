@@ -79,12 +79,11 @@ export async function deleteUser(id) {
 }
 
 /**
- * Получить всех пользователей (с пагинацией)
+ * Получить всех пользователей
  */
-export async function getAllUsers({ limit = 50, offset = 0 } = {}) {
+export async function getAllUsers() {
   const [rows] = await db.execute(
-    `SELECT id, username, email, phone, role, created_at, updated_at FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-    [limit, offset]
+    `SELECT id, username, email, phone, role, created_at, updated_at FROM users ORDER BY id ASC`
   );
   return rows;
 }

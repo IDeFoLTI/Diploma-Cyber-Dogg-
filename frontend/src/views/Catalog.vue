@@ -68,7 +68,12 @@
           <div class="product-card">
             <div class="product-image-wrapper">
               <div class="product-image">
-                <span class="product-placeholder">{{ product.name }}</span>
+                <img
+                  v-if="product.images?.length || product.image"
+                  :src="product.images?.[0] || product.image"
+                  :alt="product.name"
+                />
+                <span v-else class="product-placeholder">{{ product.name }}</span>
               </div>
               <div class="product-badge">Новинка</div>
             </div>

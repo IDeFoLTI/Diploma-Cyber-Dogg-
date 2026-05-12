@@ -2,6 +2,10 @@
  * Админ роуты
  */
 import { authenticateAdmin } from "../middleware/auth.js";
+import { createProduct, getAllProducts, updateProduct, deleteProduct } from "../models/Product.js";
+import { db } from "../db.js";
+import fs from "fs";
+import { pipeline } from "stream/promises";
 
 export async function adminRoutes(app) {
   // Получить все бронирования
@@ -16,6 +20,95 @@ export async function adminRoutes(app) {
       return reply.status(500).send({
         error: "INTERNAL_ERROR",
         message: "Не удалось получить бронирования",
+      });
+    }
+  });
+
+  // Добавить игровое время пользователю
+  app.post("/api/admin/game-time/add", {
+    preHandler: authenticateAdmin,
+  }, async (request, reply) => {
+    try {
+      const { phone, hall, hours } = request.body;
+
+      if (!phone || !hall || !hours || hours <= 0) {
+        return reply.status(400).send({
+          error: "VALIDATION_ERROR",
+          message: "Необходимы: phone, hall, hours (>0)",
+        });
+      }
+
+      // Найти пользователя по телефону
+      const [users] = await db.query(
+        "SELECT id FROM users WHERE phone = ?",
+        [phone]
+      );
+      
+      if (users.length === 0) {
+        return reply.status(404).send({
+          error: "NOT_FOUND",
+          message: "Пользователь с таким телефоном не найден",
+        });
+      }
+
+      const userId = users[0].id;
+
+      // Определить zone_id и hours_type на основе hall
+      let zoneId, hoursType;
+      if (hall.includes('common_room')) {
+        zoneId = 1;
+        hoursType = hall.includes('day') ? 'day' : 'night';
+      } else if (hall.includes('battle_arena')) {
+        zoneId = 2;
+        hoursType = hall.includes('day') ? 'day' : 'night';
+      } else if (hall.includes('vip_room')) {
+        zoneId = 3;
+        hoursType = hall.includes('day') ? 'day' : 'night';
+      } else if (hall.includes('playstation')) {
+        zoneId = 4;
+        hoursType = hall.includes('_5') ? 'under_5' : 'under_7';
+      } else {
+        return reply.status(400).send({
+          error: "VALIDATION_ERROR",
+          message: "Неверный формат hall",
+        });
+      }
+
+      // Добавить время
+      await db.query(
+        "INSERT INTO user_time (user_id, zone_id, hours_type, hours) VALUES (?, ?, ?, ?)",
+        [userId, zoneId, hoursType, hours]
+      );
+
+      return reply.status(200).send({
+        message: "Время добавлено",
+        userId,
+        hours,
+      });
+    } catch (err) {
+      request.log.error("Add game time error:", err);
+      return reply.status(500).send({
+        error: "INTERNAL_ERROR",
+        message: "Не удалось добавить время",
+      });
+    }
+  });
+
+  // Получить заказы сертификатов
+  app.get("/api/admin/certificates/orders", {
+    preHandler: authenticateAdmin,
+  }, async (request, reply) => {
+    try {
+      const [orders] = await db.query(
+        "SELECT * FROM certificate_orders ORDER BY created_at DESC"
+      );
+
+      return reply.status(200).send({ orders });
+    } catch (err) {
+      request.log.error("Get certificate orders error:", err);
+      return reply.status(500).send({
+        error: "INTERNAL_ERROR",
+        message: "Не удалось получить заказы",
       });
     }
   });
@@ -164,6 +257,170 @@ export async function adminRoutes(app) {
       return reply.status(500).send({
         error: "INTERNAL_ERROR",
         message: "Не удалось удалить пользователя",
+      });
+    }
+  });
+
+  // Получить все товары для админа
+  app.get("/api/admin/products", {
+    preHandler: authenticateAdmin,
+  }, async (request, reply) => {
+    try {
+      const products = await getAllProducts();
+      return reply.status(200).send({ success: true, data: products });
+    } catch (err) {
+      request.log.error("Admin get products error:", err);
+      return reply.status(500).send({
+        error: "INTERNAL_ERROR",
+        message: "Не удалось получить товары",
+      });
+    }
+  });
+
+  // Добавить товар с изображениями
+  app.post("/api/admin/products", {
+    preHandler: authenticateAdmin,
+  }, async (request, reply) => {
+    try {
+      const parts = request.parts();
+      const data = {};
+      const images = [];
+
+      for await (const part of parts) {
+        if (part.type === 'file' && part.fieldname === 'images') {
+          if (images.length >= 3) {
+            await part.file.resume();
+            continue;
+          }
+
+          const safeName = part.filename
+            ? part.filename.replace(/[^a-zA-Z0-9._-]/g, '_')
+            : `image_${Date.now()}`;
+          const filename = `${Date.now()}-${safeName}`;
+          const targetPath = new URL(`../uploads/products/${filename}`, import.meta.url);
+          const writeStream = fs.createWriteStream(targetPath);
+          await pipeline(part.file, writeStream);
+          images.push(`/uploads/products/${filename}`);
+        }
+
+        if (part.type === 'field') {
+          data[part.fieldname] = part.value;
+        }
+      }
+
+      const name = data.name?.trim();
+      const description = data.description?.trim() || '';
+      const price = parseFloat(data.price);
+      const category = data.category?.trim();
+      const category_name = data.category_name?.trim();
+      const features = data.features ? data.features.split(',').map(item => item.trim()).filter(Boolean) : [];
+
+      if (!name || !category || !category_name || Number.isNaN(price)) {
+        return reply.status(400).send({
+          success: false,
+          message: 'Поля name, price, category и category_name обязательны'
+        });
+      }
+
+      const productId = await createProduct({
+        name,
+        description,
+        price,
+        category,
+        category_name,
+        images,
+        features
+      });
+
+      return reply.status(201).send({ success: true, id: productId });
+    } catch (err) {
+      request.log.error("Admin create product error:", err);
+      return reply.status(500).send({
+        error: "INTERNAL_ERROR",
+        message: "Не удалось добавить товар",
+      });
+    }
+  });
+
+  // Редактировать товар с изображениями
+  app.put("/api/admin/products/:id", {
+    preHandler: authenticateAdmin,
+  }, async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const parts = request.parts();
+      const data = {};
+      const images = [];
+
+      for await (const part of parts) {
+        if (part.type === 'file' && part.fieldname === 'images') {
+          if (images.length >= 3) {
+            await part.file.resume();
+            continue;
+          }
+
+          const safeName = part.filename
+            ? part.filename.replace(/[^a-zA-Z0-9._-]/g, '_')
+            : `image_${Date.now()}`;
+          const filename = `${Date.now()}-${safeName}`;
+          const targetPath = new URL(`../uploads/products/${filename}`, import.meta.url);
+          const writeStream = fs.createWriteStream(targetPath);
+          await pipeline(part.file, writeStream);
+          images.push(`/uploads/products/${filename}`);
+        }
+
+        if (part.type === 'field') {
+          data[part.fieldname] = part.value;
+        }
+      }
+
+      const name = data.name?.trim();
+      const description = data.description?.trim() || '';
+      const price = parseFloat(data.price);
+      const category = data.category?.trim();
+      const category_name = data.category_name?.trim();
+      const features = data.features ? data.features.split(',').map(item => item.trim()).filter(Boolean) : [];
+
+      if (!name || !category || !category_name || Number.isNaN(price)) {
+        return reply.status(400).send({
+          success: false,
+          message: 'Поля name, price, category и category_name обязательны'
+        });
+      }
+
+      await updateProduct(id, {
+        name,
+        description,
+        price,
+        category,
+        category_name,
+        images: images.length > 0 ? images : undefined, // не обновлять изображения, если не загружены новые
+        features
+      });
+
+      return reply.status(200).send({ success: true });
+    } catch (err) {
+      request.log.error("Admin update product error:", err);
+      return reply.status(500).send({
+        error: "INTERNAL_ERROR",
+        message: "Не удалось обновить товар",
+      });
+    }
+  });
+
+  // Удалить товар
+  app.delete("/api/admin/products/:id", {
+    preHandler: authenticateAdmin,
+  }, async (request, reply) => {
+    try {
+      const { id } = request.params;
+      await deleteProduct(id);
+      return reply.status(200).send({ success: true });
+    } catch (err) {
+      request.log.error("Admin delete product error:", err);
+      return reply.status(500).send({
+        error: "INTERNAL_ERROR",
+        message: "Не удалось удалить товар",
       });
     }
   });

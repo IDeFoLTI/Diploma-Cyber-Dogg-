@@ -1,17 +1,4 @@
-/**
- * Простая хеш-функция (замените на bcrypt в production)
- * Детерминированная - одинаковый пароль = одинаковый хеш
- */
-function simpleHash(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return Math.abs(hash).toString(36);
-}
-
+import bcrypt from "bcrypt";
 import {
   createUser,
   findUserByEmail,
@@ -19,7 +6,10 @@ import {
   findUserById,
   updateUser,
   deleteUser,
+  getAllUsers,
 } from "../repositories/userRepository.js";
+
+const SALT_ROUNDS = 10;
 
 /**
  * Регистрация пользователя
@@ -37,8 +27,13 @@ export async function registerUser({ username, email, phone, password }) {
     throw new Error("USERNAME_ALREADY_EXISTS");
   }
 
-  // Хешируем пароль (простая функция для dev)
-  const hashedPassword = simpleHash(password);
+  // Хешируем пароль с помощью bcrypt
+  const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+  // Проверяем, есть ли уже пользователи в системе
+  const allUsers = await getAllUsers();
+  const isFirstUser = allUsers.length === 0;
+  const role = isFirstUser ? "admin" : "user";
 
   // Создаём пользователя
   const user = await createUser({
@@ -46,6 +41,7 @@ export async function registerUser({ username, email, phone, password }) {
     email,
     phone,
     password: hashedPassword,
+    role,
   });
 
   return user;
@@ -65,9 +61,9 @@ export async function loginUser({ username, password }) {
     throw new Error("USER_NOT_FOUND");
   }
 
-  // Проверяем пароль (простая проверка для dev)
-  const testHash = simpleHash(password);
-  if (testHash !== user.password) {
+  // Проверяем пароль с помощью bcrypt
+  const isValidPassword = await bcrypt.compare(password, user.password);
+  if (!isValidPassword) {
     throw new Error("INVALID_PASSWORD");
   }
 
@@ -107,9 +103,9 @@ export async function updateProfile(id, data) {
     }
   }
 
-  // Если меняется пароль — хешировать
+  // Если меняется пароль — хешировать с bcrypt
   if (data.password) {
-    data.password = simpleHash(data.password);
+    data.password = await bcrypt.hash(data.password, SALT_ROUNDS);
   }
 
   return await updateUser(id, data);
