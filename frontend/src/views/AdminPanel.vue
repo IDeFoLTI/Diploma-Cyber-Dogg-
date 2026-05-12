@@ -5,25 +5,24 @@
     <div class="admin-container">
       <div class="header-row">
         <h1>Админ-панель</h1>
-        <button class="logout-btn" @click="logout">Выйти</button>
+        <div class="header-buttons">
+          <button class="back-btn" @click="goToProfile">Личный кабинет</button>
+          <button class="logout-btn" @click="logout">Выйти</button>
+        </div>
       </div>
 
       <!-- Панель управления -->
       <div class="admin-actions">
         <button class="action-btn" @click="showAddTimeModal = true">
-          <span class="btn-icon">⏱️</span>
           Добавить игровое время
         </button>
         <button class="action-btn" @click="showActivateCertModal = true">
-          <span class="btn-icon">🎫</span>
           Активировать сертификат
         </button>
         <button class="action-btn" @click="showAddUserModal = true">
-          <span class="btn-icon">👤</span>
           Добавить аккаунт
         </button>
         <button class="action-btn delete" @click="showDeleteUserModal = true">
-          <span class="btn-icon">🗑️</span>
           Удалить аккаунт
         </button>
       </div>
@@ -41,6 +40,18 @@
           @click="activeTab = 'certificates'; loadCertificates()"
         >
           Сертификаты
+        </button>
+        <button 
+          :class="['tab', { active: activeTab === 'menu' }]"
+          @click="activeTab = 'menu'"
+        >
+          Меню
+        </button>
+        <button 
+          :class="['tab', { active: activeTab === 'prices' }]"
+          @click="activeTab = 'prices'"
+        >
+          Цены залов
         </button>
       </div>
 
@@ -136,6 +147,16 @@
             </tbody>
           </table>
         </div>
+      </div>
+
+      <!-- Секция меню -->
+      <div v-if="activeTab === 'menu'" class="admin-section">
+        <MenuManagement />
+      </div>
+
+      <!-- Секция цен залов -->
+      <div v-if="activeTab === 'prices'" class="admin-section">
+        <PriceManagement />
       </div>
     </div>
 
@@ -264,6 +285,8 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import SiteHeader from '../components/header/SiteHeader.vue';
 import SiteFooter from '../components/footer/SiteFooter.vue';
+import MenuManagement from '../components/MenuManagement.vue';
+import PriceManagement from '../components/PriceManagement.vue';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -523,6 +546,10 @@ function logout() {
   router.push('/');
 }
 
+function goToProfile() {
+  router.push('/profile');
+}
+
 async function addUser() {
   addUserError.value = '';
   addUserSuccess.value = '';
@@ -688,7 +715,7 @@ function formatHallShort(hall) {
 .admin-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 100px var(--spacing-md) var(--spacing-xl);
+  padding: 160px var(--spacing-md) var(--spacing-xl);
   width: 100%;
 }
 
@@ -697,6 +724,30 @@ function formatHallShort(hall) {
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-lg);
+}
+
+.header-buttons {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.back-btn {
+  padding: 12px 24px;
+  background: rgba(52, 152, 219, 0.2);
+  border: 2px solid rgba(52, 152, 219, 0.4);
+  color: #3498db;
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  font-family: "Roboto", sans-serif;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: var(--c-accent);
+  border-color: var(--c-accent);
+  color: var(--c-white);
 }
 
 h1 {
@@ -738,7 +789,6 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
   padding: var(--spacing-lg);
   background: rgba(255, 255, 255, 0.05);
   border: 2px solid rgba(255, 255, 255, 0.1);

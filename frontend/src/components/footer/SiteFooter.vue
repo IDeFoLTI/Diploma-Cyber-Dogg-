@@ -47,6 +47,7 @@ const vkUrl = '/icons/vk.svg';
   margin-top: auto;
   position: relative;
   width: 100%;
+  z-index: 10;
 }
 
 .site-footer::before {
@@ -120,10 +121,12 @@ const vkUrl = '/icons/vk.svg';
   color: var(--c-white);
   padding: var(--spacing-xs);
   transition: color 0.2s ease;
+  cursor: pointer;
 }
 
 .footer-link:hover {
   color: var(--c-accent);
+  position: relative;
 }
 
 .footer-link.router-link-active {

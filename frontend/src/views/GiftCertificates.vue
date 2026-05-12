@@ -1,8 +1,7 @@
 <template>
   <div class="gift-page">
     <SiteHeader />
-    <main class="gift-main">
-      <div class="container">
+    <div class="container">
         <h1 class="gift-title">Сертификаты</h1>
         
         <div class="certs-wrapper">
@@ -10,8 +9,7 @@
             <CertificateBlock :cert="cert" @submit="handleCertificateSubmit" />
           </div>
         </div>
-      </div>
-    </main>
+    </div>
     <SiteFooter />
   </div>
 </template>
@@ -61,16 +59,12 @@ const handleCertificateSubmit = (data) => {
   flex-direction: column;
 }
 
-.gift-main {
-  flex: 1;
-  padding: var(--spacing-xl) 0;
-}
-
 .container {
+  flex: 1;
   width: 100%;
   max-width: 1300px;
   margin: 0 auto;
-  padding: 0 var(--spacing-md);
+  padding: 160px var(--spacing-md) var(--spacing-xl);
 }
 
 .gift-title {
@@ -84,16 +78,6 @@ const handleCertificateSubmit = (data) => {
   letter-spacing: 0.1em;
   position: relative;
   line-height: 1.2;
-}
-
-.gift-title::after {
-  content: "";
-  display: block;
-  width: clamp(60px, 10vw, 100px);
-  height: 3px;
-  background: var(--c-accent);
-  margin: 20px auto 0;
-  border-radius: 2px;
 }
 
 .certs-wrapper {

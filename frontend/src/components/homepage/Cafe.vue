@@ -107,10 +107,14 @@ const burgerImage = '/img/burgerCafe.png';
   width: 100%;
   height: 250px;
   border-radius: 20px;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.cafe-image-wrapper:hover {
+  transform: translateY(-5px);
 }
 
 .cafe-image {
@@ -120,6 +124,29 @@ const burgerImage = '/img/burgerCafe.png';
   height: auto;
   object-fit: contain;
   border-radius: 20px;
+  transition: transform 0.4s ease;
+}
+
+.cafe-image-wrapper:hover .cafe-image {
+  transform: scale(1.05);
+}
+
+.cafe-image-wrapper:hover {
+  transform: translateY(-5px);
+}
+
+.cafe-image {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 20px;
+  transition: transform 0.4s ease;
+}
+
+.cafe-image-wrapper:hover .cafe-image {
+  transform: scale(1.05);
 }
 
 .cafe-button {

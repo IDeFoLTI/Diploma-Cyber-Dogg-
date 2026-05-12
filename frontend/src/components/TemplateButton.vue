@@ -95,13 +95,18 @@ const handleClick = (event) => {
   white-space: nowrap;
 }
 
-/* Primary - заливка белая, текст чёрный */
+/* Primary - прозрачная с белой обводкой и белым текстом */
 .template-btn--primary {
-  background: var(--c-white);
+  background: transparent;
+  border-color: var(--c-white);
 }
 
 .template-btn--primary .template-btn__text {
-  color: var(--c-bg);
+  color: var(--c-white);
+}
+
+.template-btn--primary:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Secondary - прозрачная с белой обводкой */

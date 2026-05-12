@@ -1,0 +1,212 @@
+[
+  {
+    "name": "PlayStation 5",
+    "description": "Игровая консоль нового поколения с поддержкой игр в 4K разрешении и скоростью загрузки SSD",
+    "price": 54990,
+    "category": "consoles",
+    "category_name": "Игровые консоли",
+    "image": "/img/products/ps5.jpg",
+    "features": [
+      "Процессор AMD Ryzen Zen 2",
+      "8K выход",
+      "HDR технология",
+      "Встроенный SSD 825GB",
+      "Контроллер DualSense"
+    ]
+  },
+  {
+    "name": "Xbox Series X",
+    "description": "Мощная игровая консоль с поддержкой игр до 120 FPS и обратной совместимостью",
+    "price": 49990,
+    "category": "consoles",
+    "category_name": "Игровые консоли",
+    "image": "/img/products/xbox-series-x.jpg",
+    "features": [
+      "12 TFLOPS мощности",
+      "Быстрая загрузка",
+      "Game Pass включён",
+      "Встроенный SSD 1TB",
+      "4K при 120 FPS"
+    ]
+  },
+  {
+    "name": "Nintendo Switch OLED",
+    "description": "Универсальная гибридная консоль с ярким OLED-экраном",
+    "price": 34990,
+    "category": "consoles",
+    "category_name": "Игровые консоли",
+    "image": "/img/products/switch-oled.jpg",
+    "features": [
+      "7-дюймовый OLED экран",
+      "Режимы: ТВ, стол, портатив",
+      "64GB встроенной памяти",
+      "Улучшенные динамики",
+      "Адапtable столик"
+    ]
+  },
+  {
+    "name": "Беспроводной геймпад DualSense",
+    "description": "Оригинальный контроллер для PlayStation 5 с тактильной отдачей",
+    "price": 7990,
+    "category": "accessories",
+    "category_name": "Аксессуары",
+    "image": "/img/products/dualsense.jpg",
+    "features": [
+      "Тактильная отдача",
+      "Адаптивные триггеры",
+      "Встроенный микрофон",
+      "Батарея до 12 часов",
+      "Поддержка USB-C"
+    ]
+  },
+  {
+    "name": "Игровая гарнитура SteelSeries Arctis 7",
+    "description": "Беспроводная игровая гарнитура с качественным звуком и микрофоном",
+    "price": 12990,
+    "category": "accessories",
+    "category_name": "Аксессуары",
+    "image": "/img/products/arctis-7.jpg",
+    "features": [
+      "2.4GHz беспроводное соединение",
+      "24 часа работы от батареи",
+      "Окружающий звук 7.1",
+      "Съемный микрофон",
+      "Удобные амбушюры"
+    ]
+  },
+  {
+    "name": "Игровая мышь Logitech G Pro X",
+    "description": "Профессиональная игровая мышь для киберспорта",
+    "price": 8990,
+    "category": "accessories",
+    "category_name": "Аксессуары",
+    "image": "/img/products/logitech-gpro.jpg",
+    "features": [
+      "Сенсор 25K HERO",
+      "Масса 63г",
+      "Кнопки OmniPoint",
+      "LIGHTSPEED технология",
+      "25600 DPI"
+    ]
+  },
+  {
+    "name": "Механическая клавиатура Razer BlackWidow",
+    "description": "Игровая механическая клавиатура с RGB подсветкой",
+    "price": 11990,
+    "category": "keyboards",
+    "category_name": "Клавиатуры",
+    "image": "/img/products/razer-blackwidow.jpg",
+    "features": [
+      "Механические переключатели",
+      "Chroma RGB подсветка",
+      "Медиа-клавиши",
+      "Подлокотник",
+      "Анти-голфинг"
+    ]
+  },
+  {
+    "name": "Механическая клавиатура Corsair K95",
+    "description": "Премиальная механическая клавиатура с алюминиевой рамкой",
+    "price": 14990,
+    "category": "keyboards",
+    "category_name": "Клавиатуры",
+    "image": "/img/products/corsair-k95.jpg",
+    "features": [
+      "Cherry MX переключатели",
+      "PBT ключcaps",
+      "Мультимедийные клавиши",
+      "Подсветка RGB",
+      "USB порты"
+    ]
+  },
+  {
+    "name": "Механическая клавиатура Logitech G915",
+    "description": "Беспроводная механическая клавиатура низкопрофильного дизайна",
+    "price": 18990,
+    "category": "keyboards",
+    "category_name": "Клавиатуры",
+    "image": "/img/products/logitech-g915.jpg",
+    "features": [
+      "LOW-PROFILE механика",
+      "LIGHTSPEED беспроводная связь",
+      "40 часов батареи",
+      "Aircraft-grade алюминий",
+      "Тактильные переключатели"
+    ]
+  },
+  {
+    "name": "FIFA 24 (FC 24)",
+    "description": "Самая реалистичная футбольная игра с технологией HyperMotion V",
+    "price": 3990,
+    "category": "games",
+    "category_name": "Игры",
+    "image": "/img/products/fc24.jpg",
+    "features": [
+      "HyperMotion V",
+      "PlayStyles Opti",
+      "Режим карьеры",
+      "Ultimate Team",
+      "Многосторонний режим"
+    ]
+  },
+  {
+    "name": "Call of Duty: Modern Warfare III",
+    "description": "Шутер от первого лица с захватывающей кампанией и мультиплеером",
+    "price": 5990,
+    "category": "games",
+    "category_name": "Игры",
+    "image": "/img/products/cod-mw3.jpg",
+    "features": [
+      "Кампания",
+      "Мультиплеер",
+      "Warzone 2.0",
+      "Зомби режим",
+      "Кроссплатформа"
+    ]
+  },
+  {
+    "name": "Helldivers 2",
+    "description": "Кооперативный шутер от третьего лица с дружественным огнём",
+    "price": 3490,
+    "category": "games",
+    "category_name": "Игры",
+    "image": "/img/products/helldivers2.jpg",
+    "features": [
+      "Кооператив до 4 игроков",
+      "Открытый мир",
+      "Стратегические миссии",
+      "Уникальное оружие",
+      "Постоянные обновления"
+    ]
+  },
+  {
+    "name": "Монитор Samsung Odyssey G7 27\"",
+    "description": "Игровой монитор с частотой обновления 240 Гц и изогнутым экраном",
+    "price": 45990,
+    "category": "monitors",
+    "category_name": "Мониторы",
+    "image": "/img/products/odyssey-g7.jpg",
+    "features": [
+      "240Hz частота обновления",
+      "1ms время отклика",
+      "QLED технология",
+      "1000R изгиб",
+      "G-Sync совместимый"
+    ]
+  },
+  {
+    "name": "VR-шлем Meta Quest 3",
+    "description": "Беспроводной VR-шлем нового поколения с смешанной реальностью",
+    "price": 64990,
+    "category": "vr",
+    "category_name": "VR оборудование",
+    "image": "/img/products/quest3.jpg",
+    "features": [
+      "2064x2208 на глаз",
+      "Процессор Snapdragon XR2 Gen 2",
+      "128GB/512GB",
+      "Отслеживание рук",
+      "Смешанная реальность"
+    ]
+  }
+]

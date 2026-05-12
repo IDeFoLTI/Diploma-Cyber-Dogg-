@@ -101,7 +101,7 @@ defineProps({
   height: 500px;
   flex-shrink: 0;
   border-radius: 15px;
-  overflow: hidden;
+  transition: transform 0.3s ease;
 }
 
 .room-card__image-wrapper--small {
@@ -113,6 +113,12 @@ defineProps({
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 15px;
+  transition: transform 0.4s ease;
+}
+
+.room-card__image-wrapper:hover .room-card__image {
+  transform: scale(1.08);
 }
 
 .room-card__content {

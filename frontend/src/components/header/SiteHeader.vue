@@ -19,6 +19,7 @@ const navItems = [
   { label: "Главная", href: "/" },
   { label: "Меню", href: "/menu" },
   { label: "Цены", href: "/price" },
+  { label: "Каталог", href: "/catalog" },
 ];
 </script>
 
@@ -26,8 +27,9 @@ const navItems = [
 .site-header {
   width: 100%;
   background: var(--c-bg);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
   z-index: 1000;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
@@ -75,10 +77,6 @@ const navItems = [
 
   .right-group {
     gap: var(--spacing-xs);
-  }
-
-  .site-header {
-    position: fixed;
   }
 }
 

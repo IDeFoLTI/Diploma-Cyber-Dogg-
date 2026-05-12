@@ -1,8 +1,7 @@
 <template>
   <div class="buy-page">
     <SiteHeader />
-    <main class="buy-main">
-      <div class="container">
+    <div class="container">
         <h1 class="buy-title">Покупка сертификата</h1>
         
         <div v-if="loading" class="loading">Загрузка...</div>
@@ -75,8 +74,7 @@
           <!-- Кнопка назад -->
           <button class="back-btn" @click="goBack">← Вернуться к выбору</button>
         </div>
-      </div>
-    </main>
+    </div>
     <SiteFooter />
   </div>
 </template>
@@ -254,16 +252,12 @@ async function submitOrder() {
   flex-direction: column;
 }
 
-.buy-main {
-  flex: 1;
-  padding: var(--spacing-xl) 0;
-}
-
 .container {
+  flex: 1;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-md);
+  padding: 160px var(--spacing-md) var(--spacing-xl);
 }
 
 .buy-title {
@@ -277,16 +271,6 @@ async function submitOrder() {
   letter-spacing: 0.1em;
   position: relative;
   line-height: 1.2;
-}
-
-.buy-title::after {
-  content: "";
-  display: block;
-  width: clamp(60px, 10vw, 100px);
-  height: 3px;
-  background: var(--c-accent);
-  margin: 20px auto 0;
-  border-radius: 2px;
 }
 
 .loading, .error {

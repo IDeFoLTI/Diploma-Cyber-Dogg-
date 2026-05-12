@@ -5,11 +5,17 @@ import { db } from "./db.js";
 import { createUserTable } from "./models/User.js";
 import { createUserTimeTable } from "./models/UserTime.js";
 import { createCertificateOrdersTable } from "./models/CertificateOrder.js";
+import { createMenuTables, createMenuItemsTable } from "./models/Menu.js";
+import { createPriceZonesTable, createZonePricesTable } from "./models/PriceZone.js";
+import { createProductsTable } from "./models/Product.js";
 import { authRoutes, userRoutes } from "./routes/userRoutes.js";
 import { reservationRoutes } from "./routes/reservationRoutes.js";
 import { adminRoutes } from "./routes/adminRoutes.js";
 import { gameTimeRoutes } from "./routes/gameTimeRoutes.js";
 import { certificateRoutes } from "./routes/certificateRoutes.js";
+import { menuRoutes } from "./routes/menuRoutes.js";
+import { priceRoutes } from "./routes/priceRoutes.js";
+import { productRoutes } from "./routes/productRoutes.js";
 
 const app = Fastify({ logger: true });
 
@@ -29,6 +35,26 @@ const start = async () => {
       credentials: true
     });
     console.log("✅ CORS registered");
+    
+    // Инициализация БД ПЕРЕД роутами
+    console.log("🔄 Initializing database...");
+    await db.query(createUserTable);
+    console.log("✅ Users table initialized");
+    await db.query(createUserTimeTable);
+    console.log("✅ User game time table initialized");
+    await db.query(createCertificateOrdersTable);
+    console.log("✅ Certificate orders table initialized");
+    await db.query(createMenuTables);
+    console.log("✅ Menu categories table initialized");
+    await db.query(createMenuItemsTable);
+    console.log("✅ Menu items table initialized");
+    await db.query(createPriceZonesTable);
+    console.log("✅ Price zones table initialized");
+    await db.query(createZonePricesTable);
+    console.log("✅ Zone prices table initialized");
+    await db.query(createProductsTable);
+    console.log("✅ Products table initialized");
+    console.log("✅ Database initialized");
     
     // Роуты
     app.get("/health", async (request, reply) => {
@@ -74,15 +100,20 @@ const start = async () => {
     certificateRoutes(app);
     console.log("✅ Certificate routes registered");
     
-    // Инициализация БД
-    console.log("🔄 Initializing database...");
-    await db.query(createUserTable);
-    console.log("✅ Users table initialized");
-    await db.query(createUserTimeTable);
-    console.log("✅ User game time table initialized");
-    await db.query(createCertificateOrdersTable);
-    console.log("✅ Certificate orders table initialized");
-    console.log("✅ Database initialized");
+    // Подключаем роуты меню
+    console.log("🔄 Registering menu routes...");
+    menuRoutes(app);
+    console.log("✅ Menu routes registered");
+    
+    // Подключаем роуты цен
+    console.log("🔄 Registering price routes...");
+    priceRoutes(app);
+    console.log("✅ Price routes registered");
+    
+    // Подключаем роуты товаров
+    console.log("🔄 Registering product routes...");
+    productRoutes(app);
+    console.log("✅ Product routes registered");
     
     // Запуск сервера
     console.log(`🔄 Starting server on http://${host}:${port}...`);

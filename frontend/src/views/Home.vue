@@ -7,6 +7,7 @@
     <Sale />
     <Reservation />
     <GiftCertificates />
+    <GamingAccessories />
     <SiteFooter />
   </div>
 </template>
@@ -20,6 +21,7 @@ import Cafe from "../components/homepage/Cafe.vue";
 import Sale from "../components/homepage/Sale.vue";
 import Reservation from "../components/homepage/Reservation.vue";
 import GiftCertificates from "../components/homepage/GiftCertificates.vue";
+import GamingAccessories from "../components/homepage/GamingAccessories.vue";
 </script>
 
 <style scoped>
@@ -28,6 +30,7 @@ import GiftCertificates from "../components/homepage/GiftCertificates.vue";
   background: var(--c-bg);
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  position: relative;
+  z-index: 1;
 }
 </style>

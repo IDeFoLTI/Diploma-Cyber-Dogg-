@@ -18,7 +18,7 @@
         :to="item.href"
         class="nav-item"
         :class="{ 'is-active': $route.path === item.href }"
-        @click="closeMenu"
+        @click="handleClick"
       >
         <span class="label">{{ item.label }}</span>
       </router-link>
@@ -41,6 +41,10 @@ const toggleMenu = () => {
 const closeMenu = () => {
   isOpen.value = false;
   document.body.style.overflow = '';
+};
+
+const handleClick = () => {
+  closeMenu();
 };
 
 defineProps({
@@ -113,6 +117,7 @@ defineProps({
   align-items: center;
   justify-content: center;
   transition: transform 0.2s ease, color 0.2s ease;
+  pointer-events: auto;
 }
 
 .nav-item::before {
@@ -123,8 +128,9 @@ defineProps({
   border: 2px solid var(--c-white);
   transform: skewX(-30deg);
   transform-origin: center;
-  z-index: 0;
+  z-index: -1;
   transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  pointer-events: none;
 }
 
 .label {

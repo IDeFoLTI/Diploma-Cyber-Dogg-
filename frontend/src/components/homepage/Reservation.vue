@@ -79,9 +79,14 @@
               </div>
             </div>
             
-            <button type="submit" class="reservation-btn" :disabled="isSubmitting">
+            <TemplateButton 
+              variant="outlined-white"
+              type="submit" 
+              :disabled="isSubmitting"
+              class="reservation-btn"
+            >
               {{ isSubmitting ? 'Отправка...' : 'Забронировать' }}
-            </button>
+            </TemplateButton>
 
             <p v-if="submitSuccess" class="success-message">Заявка успешно отправлена! Мы свяжемся с вами.</p>
             <p v-if="submitError" class="error-message-global">{{ submitError }}</p>
@@ -94,6 +99,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue';
+import TemplateButton from '../TemplateButton.vue';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -442,36 +448,41 @@ const submitForm = async () => {
   margin-top: var(--spacing-sm);
 }
 
-.reservation-btn {
-  font-family: "Bowler", sans-serif;
-  font-size: var(--font-md);
-  font-weight: 400;
-  color: var(--c-white);
-  background: transparent;
-  border: 2px solid var(--c-accent);
-  border-radius: 0;
-  padding: var(--spacing-md) var(--spacing-xl);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+.reservation-btn :deep(.template-btn) {
+  width: 100% !important;
+  min-width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 55px !important;
+  border: 2px solid var(--c-white) !important;
+  background: transparent !important;
+  transition: all 0.3s ease !important;
+  padding: var(--spacing-md) var(--spacing-xl) !important;
   margin-top: var(--spacing-sm);
 }
 
-.reservation-btn:disabled {
+.reservation-btn :deep(.template-btn__text) {
+  font-size: clamp(14px, 2.5vw, 16px) !important;
+  color: var(--c-white) !important;
+  font-weight: 500;
+  font-family: "Bowler", sans-serif !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.reservation-btn :deep(.template-btn:hover):not(:disabled) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-2px) !important;
+}
+
+.reservation-btn :deep(.template-btn:disabled) {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
+  transform: none !important;
 }
 
-.reservation-btn:hover:not(:disabled) {
-  background: var(--c-accent);
-  color: var(--c-bg);
-  transform: translateY(-2px);
-}
-
-.reservation-btn:active {
-  transform: translateY(0);
+.reservation-btn :deep(.template-btn:active) {
+  transform: translateY(0) !important;
 }
 
 /* Адаптивность для десктопов */
@@ -545,7 +556,19 @@ const submitForm = async () => {
   }
 
   .reservation-btn {
-    width: 100%;
+    width: 100% !important;
+  }
+
+  .reservation-btn :deep(.template-btn) {
+    width: 100% !important;
+    min-width: auto !important;
+    max-width: 100% !important;
+    min-height: 50px !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+  }
+
+  .reservation-btn :deep(.template-btn__text) {
+    font-size: var(--font-sm) !important;
   }
 }
 
@@ -574,6 +597,15 @@ const submitForm = async () => {
     font-size: var(--font-sm);
     padding: var(--spacing-sm) var(--spacing-md);
   }
+
+  .reservation-btn :deep(.template-btn) {
+    min-height: 50px !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+  }
+
+  .reservation-btn :deep(.template-btn__text) {
+    font-size: var(--font-sm) !important;
+  }
 }
 
 /* Адаптивность для маленьких мобильных */
@@ -586,9 +618,13 @@ const submitForm = async () => {
     font-size: clamp(20px, 5vw, 22px);
   }
 
-  .reservation-btn {
-    font-size: var(--font-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
+  .reservation-btn :deep(.template-btn) {
+    min-height: 50px !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+  }
+
+  .reservation-btn :deep(.template-btn__text) {
+    font-size: var(--font-sm) !important;
   }
 }
 </style>

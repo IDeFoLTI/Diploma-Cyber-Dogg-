@@ -201,14 +201,15 @@ const goToResetPassword = () => {
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  padding: var(--spacing-xl) var(--spacing-md);
+  padding: 160px var(--spacing-md) var(--spacing-xl);
 }
 
 .profile-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--c-bg);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   padding: var(--spacing-xl);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .profile-title {
@@ -227,9 +228,15 @@ const goToResetPassword = () => {
   display: block;
   width: clamp(60px, 10vw, 100px);
   height: 3px;
-  background: var(--c-accent);
+  background: rgba(255, 255, 255, 0.3);
   margin: 20px auto 0;
   border-radius: 2px;
+  transition: background 0.3s ease, width 0.3s ease;
+}
+
+.profile-card:hover .profile-title::after {
+  background: var(--c-accent);
+  width: clamp(100px, 15vw, 160px);
 }
 
 .profile-content {
@@ -250,7 +257,14 @@ const goToResetPassword = () => {
   align-items: center;
   padding: var(--spacing-md);
   background: rgba(255, 255, 255, 0.03);
-  border-radius: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+.info-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(0, 140, 209, 0.3);
 }
 
 .info-label {
@@ -297,25 +311,63 @@ const goToResetPassword = () => {
 }
 
 .hall-card {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--c-bg);
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.hall-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.3s ease;
 }
 
 .hall-card:hover {
-  border-color: var(--c-accent);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 140, 209, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 140, 209, 0.15);
+}
+
+.hall-card:hover::before {
+  background: var(--c-accent);
 }
 
 .hall-title {
   font-family: "Bowler", sans-serif;
-  font-size: var(--font-md);
+  font-size: var(--font-lg);
   color: var(--c-white);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.08em;
+  padding-left: 12px;
+  border-left: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.hall-time {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.time-label {
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-sm);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.time-value {
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-lg);
+  color: var(--c-white);
+  font-weight: 600;
 }
 
 .hall-time {
@@ -328,9 +380,16 @@ const goToResetPassword = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-sm);
+  padding: var(--spacing-md);
   background: rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+.time-item:hover {
+  background: rgba(0, 140, 209, 0.1);
+  border-color: rgba(0, 140, 209, 0.3);
 }
 
 .time-label {
@@ -353,13 +412,13 @@ const goToResetPassword = () => {
   font-weight: 400;
   color: var(--c-white);
   background: transparent;
-  border: 2px solid var(--c-accent);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 0;
   padding: var(--spacing-md) var(--spacing-xl);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .reset-password-btn {
@@ -369,9 +428,10 @@ const goToResetPassword = () => {
 
 .reset-password-btn:hover,
 .logout-btn:hover {
-  background: var(--c-accent);
-  color: var(--c-bg);
+  background: rgba(0, 140, 209, 0.15);
+  border-color: var(--c-accent);
   transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 140, 209, 0.2);
 }
 
 .reset-password-btn:active,
@@ -401,19 +461,20 @@ const goToResetPassword = () => {
   font-weight: 400;
   color: var(--c-white);
   background: transparent;
-  border: 2px solid var(--c-accent);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 0;
   padding: var(--spacing-md) var(--spacing-xl);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   cursor: pointer;
-  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .login-btn:hover {
-  background: var(--c-accent);
-  color: var(--c-bg);
+  background: rgba(0, 140, 209, 0.15);
+  border-color: var(--c-accent);
   transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 140, 209, 0.2);
 }
 
 /* Адаптивность */
@@ -426,6 +487,28 @@ const goToResetPassword = () => {
 
   .profile-card {
     padding: var(--spacing-md);
+  }
+
+  .hall-time {
+    grid-template-columns: 1fr;
+  }
+
+  .time-item {
+    padding: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+
+  .profile-card {
+    padding: var(--spacing-md);
+  }
+
+  .profile-title {
+    font-size: clamp(24px, 5vw, 32px);
   }
 }
 </style>
