@@ -1,9 +1,10 @@
 ﻿<template>
   <div class="header-actions">
-    <router-link to="/gift-certificates" class="icon-button-wrapper">
-      <button class="icon-button icon-button--slant" aria-label="Сертификаты">
+    <router-link to="/cart" class="icon-button-wrapper cart-wrapper">
+      <button class="icon-button icon-button--slant" aria-label="Корзина">
         <img class="icon" :src="shopUrl" alt="" />
       </button>
+      <span v-if="totalCount > 0" class="cart-badge">{{ totalCount }}</span>
     </router-link>
     <router-link to="/register" class="icon-button-wrapper">
       <button class="icon-button icon-button--slant" aria-label="Личный кабинет">
@@ -14,8 +15,13 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
+import { useCart } from '../../composables/useCart.js';
+
 const shopUrl = new URL("../../../icons/shop.svg", import.meta.url).href;
 const cabinetUrl = new URL("../../../icons/cabinet.svg", import.meta.url).href;
+
+const { totalCount } = useCart();
 </script>
 
 <style scoped>
@@ -30,6 +36,29 @@ const cabinetUrl = new URL("../../../icons/cabinet.svg", import.meta.url).href;
   text-decoration: none;
   color: inherit;
   display: contents;
+}
+
+.icon-button-wrapper.cart-wrapper {
+  display: inline-flex;
+  position: relative;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--c-danger);
+  color: var(--c-white);
+  font-family: "Roboto", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
 }
 
 .icon-button {

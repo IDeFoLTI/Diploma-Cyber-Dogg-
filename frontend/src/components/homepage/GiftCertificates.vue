@@ -1,32 +1,28 @@
 <template>
   <section class="gift-section">
     <div class="gift-container">
-      <h2 class="gift-title">Подарочные сертификаты</h2>
-      
-      <div class="gift-content">
-        <!-- Левая часть: Текст -->
-        <div class="gift-text">
-          <p class="gift-description">
-            Подарочные сертификаты Cyber Dogg — это удобный способ подарить игровое время в клубе.
-          </p>
-          <p class="gift-description">
-            Сертификаты можно приобрести на определённое количество часов или выбрать готовые пакеты игрового времени.
-          </p>
-          <p class="gift-description">
-            Такой подарок подойдёт для друзей, тиммейтов и всех, кто любит атмосферу киберспорта и современных игр.
-          </p>
-        </div>
+      <div class="title-block">
+        <h2 class="gift-title">Подарочные сертификаты</h2>
+      </div>
 
-        <!-- Правая часть: Картинка -->
-        <div class="gift-image-wrapper">
-          <img :src="giftImage" alt="Подарочный сертификат" class="gift-image" />
+      <p class="gift-subtitle">
+        Идеальный подарок для друзей и тиммейтов
+      </p>
+
+      <div class="certs-wrapper">
+        <div v-for="cert in certificates" :key="cert.id" class="cert-card">
+          <div class="cert-image-box">
+            <img :src="cert.image" :alt="cert.title" class="cert-img" />
+          </div>
+          <div class="cert-footer">
+            <h3 class="cert-name">{{ cert.title }}</h3>
+          </div>
         </div>
       </div>
 
-      <!-- Кнопка -->
-      <div class="gift-button">
+      <div class="cta-wrapper">
         <router-link to="/gift-certificates" class="gift-link">
-          <TemplateButton variant="outlined-white">Купить сертификат</TemplateButton>
+          <TemplateButton variant="outlined-white">Все сертификаты</TemplateButton>
         </router-link>
       </div>
     </div>
@@ -36,164 +32,148 @@
 <script setup>
 import TemplateButton from '../TemplateButton.vue';
 
-const giftImage = "/img/sert.svg";
+const standartSert = "/img/standartSert.svg";
+const battleArenaSert = "/img/battleArenaSert.svg";
+const playstationSert = "/img/playstationSert.svg";
+const vipSert = "/img/vipSert.svg";
+
+const certificates = [
+  { id: 'standart', title: 'Common Room', image: standartSert },
+  { id: 'battle', title: 'Battle Arena', image: battleArenaSert },
+  { id: 'vip', title: 'VIP Room', image: vipSert },
+  { id: 'playstation', title: 'PlayStation', image: playstationSert }
+];
 </script>
 
 <style scoped>
 .gift-section {
-  padding: var(--spacing-2xl) 0;
+  padding: var(--spacing-xl) 0;
   background: var(--c-bg);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
-  overflow-x: hidden;
+  position: relative;
+  overflow: hidden;
+}
+
+.gift-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 140, 209, 0.3), transparent);
 }
 
 .gift-container {
   width: 100%;
-  max-width: 1300px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 var(--spacing-md);
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.gift-title {
-  font-family: "Bowler", sans-serif;
-  font-size: var(--font-2xl);
-  font-weight: 400;
-  color: var(--c-white);
-  text-align: center;
-  margin: 0 0 var(--spacing-xl) 0;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
   position: relative;
-  line-height: 1.2;
+  z-index: 1;
 }
 
-.gift-content {
-  display: flex;
-  gap: var(--spacing-xl);
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin-bottom: var(--spacing-2xl);
-}
-
-.gift-container {
-  width: 100%;
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-md);
+.title-block {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: var(--spacing-sm);
 }
 
 .gift-title {
   font-family: "Bowler", sans-serif;
-  font-size: var(--font-2xl);
+  font-size: clamp(32px, 6vw, 48px);
   font-weight: 400;
   color: var(--c-white);
   text-align: center;
-  margin: 0 0 var(--spacing-xl) 0;
+  margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  position: relative;
-  line-height: 1.2;
+  letter-spacing: 0.15em;
 }
 
-.gift-title::after {
-  content: "";
-  display: block;
-  width: clamp(60px, 10vw, 100px);
-  height: 3px;
-  background: var(--c-accent);
-  margin: 20px auto 0;
-  border-radius: 2px;
+.gift-subtitle {
+  font-family: "Roboto", sans-serif;
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--c-white-70);
+  text-align: center;
+  margin: var(--spacing-lg) 0 var(--spacing-xl);
+  line-height: 1.6;
 }
 
-.gift-content {
-  display: flex;
-  gap: var(--spacing-xl);
-  justify-content: center;
-  align-items: center;
+.certs-wrapper {
   width: 100%;
   margin-bottom: var(--spacing-xl);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-lg);
 }
 
-/* Адаптивность для экранов 400-700px */
-@media (min-width: 400px) and (max-width: 700px) {
-  .gift-content {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .gift-text {
-    min-width: 100%;
-    max-width: 100%;
-  }
-
-  .gift-image-wrapper {
-    min-width: 100%;
-    max-width: 100%;
-  }
-}
-
-.gift-text {
-  flex: 1;
-  min-width: 300px;
-  max-width: 550px;
+.cert-card {
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
 }
 
-.gift-description {
-  font-family: "Roboto", sans-serif;
-  font-size: var(--font-lg);
-  font-weight: 600;
-  color: var(--c-white);
-  line-height: 1.8;
-  text-align: left;
-  margin: 0;
+.cert-card:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-8px);
 }
 
-.gift-image-wrapper {
-  flex: 1;
-  min-width: 280px;
-  max-width: 550px;
+.cert-image-box {
+  width: 100%;
+  min-height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--spacing-lg);
-  border-radius: 20px;
-  transition: transform 0.3s ease;
+  background: transparent;
 }
 
-.gift-image-wrapper:hover {
-  transform: translateY(-8px) scale(1.02);
-}
-
-.gift-image {
-  max-width: 100%;
+.cert-img {
+  width: 90%;
   height: auto;
-  width: 100%;
+  object-fit: contain;
   transition: transform 0.4s ease;
 }
 
-.gift-image-wrapper:hover .gift-image {
+.cert-card:hover .cert-img {
   transform: scale(1.05);
 }
 
-.gift-button {
-  width: 100%;
+.cert-footer {
+  padding: var(--spacing-md);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.cert-name {
+  font-family: "Bowler", sans-serif;
+  font-size: clamp(14px, 2vw, 16px);
+  font-weight: 400;
+  color: var(--c-white);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  line-height: 1.3;
+}
+
+.cta-wrapper {
   display: flex;
   justify-content: center;
-  margin-top: var(--spacing-xl);
+  width: 100%;
+  margin-top: var(--spacing-md);
 }
 
 .gift-link {
@@ -202,159 +182,152 @@ const giftImage = "/img/sert.svg";
   display: contents;
 }
 
-.gift-button :deep(.template-btn) {
+.cta-wrapper :deep(.template-btn) {
   width: auto !important;
   min-width: 320px !important;
-  max-width: 400px !important;
-  height: auto !important;
-  min-height: 60px !important;
-  border: 2px solid var(--c-white) !important;
-  background: transparent !important;
-  transition: all 0.3s ease !important;
-  padding: var(--spacing-md) var(--spacing-xl) !important;
+  max-width: 440px !important;
+  height: 64px !important;
+  min-height: 64px !important;
+  padding: 0 var(--spacing-xl) !important;
 }
 
-.gift-button :deep(.template-btn__text) {
-  font-size: clamp(16px, 3.5vw, 20px) !important;
-  color: var(--c-white) !important;
-  font-weight: 500;
-}
-
-.gift-button :deep(.template-btn:hover) {
-  background: rgba(255, 255, 255, 0.1) !important;
-  transform: translateY(-2px) !important;
-}
-
-.gift-button :deep(.template-btn:active) {
-  transform: translateY(0) !important;
-}
-
-/* Адаптивность для десктопов */
-@media (min-width: 1400px) {
-  .gift-section {
-    padding: calc(var(--spacing-xl) * 1.2) 0;
-  }
-
-  .gift-title {
-    font-size: clamp(36px, 5vw, 52px);
-  }
+.cta-wrapper :deep(.template-btn__text) {
+  font-size: clamp(16px, 2.5vw, 18px) !important;
 }
 
 /* Адаптивность для планшетов */
-@media (max-width: 900px) {
-  .gift-section {
-    padding: var(--spacing-xl) 0;
+@media (max-width: 1024px) {
+  .certs-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
   }
 
-  .gift-title {
-    font-size: clamp(28px, 4vw, 34px);
-    margin-bottom: var(--spacing-lg);
+  .cert-card {
+    border-radius: 16px;
   }
 
-  .gift-content {
-    gap: var(--spacing-lg);
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .gift-text {
-    max-width: 100%;
-    text-align: center;
-  }
-
-  .gift-description {
-    text-align: center;
-  }
-
-  .gift-image-wrapper {
-    max-width: 100%;
+  .cert-image-box {
     padding: var(--spacing-lg);
-  }
-
-  .gift-button {
-    margin-top: var(--spacing-lg);
   }
 }
 
 /* Адаптивность для мобильных */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .gift-section {
-    padding: var(--spacing-md) 0;
+    padding: var(--spacing-lg) 0;
   }
 
   .gift-title {
-    font-size: clamp(22px, 5vw, 26px);
-    margin-bottom: var(--spacing-md);
+    font-size: clamp(26px, 6vw, 36px);
+    letter-spacing: 0.1em;
   }
 
-  .gift-content {
+  .gift-subtitle {
+    font-size: var(--font-sm);
+    margin: var(--spacing-md) 0 var(--spacing-lg);
+  }
+
+  .certs-wrapper {
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-md);
   }
 
-  .gift-description {
-    font-size: var(--font-md);
-    text-align: center;
-    line-height: 1.7;
+  .cert-card {
+    border-radius: 14px;
   }
 
-  .gift-image-wrapper {
+  .cert-image-box {
+    aspect-ratio: 1.5;
     padding: var(--spacing-md);
   }
 
-  .gift-button {
-    margin-top: var(--spacing-lg);
+  .cert-name {
+    font-size: 13px;
+    letter-spacing: 0.1em;
   }
 
-  .gift-button :deep(.template-btn) {
+  .cta-wrapper :deep(.template-btn) {
     min-width: 280px !important;
     max-width: 360px !important;
-    padding: var(--spacing-md) var(--spacing-lg) !important;
-    border: 2px solid var(--c-white) !important;
+    height: 56px !important;
   }
 }
 
 /* Адаптивность для маленьких мобильных */
 @media (max-width: 480px) {
   .gift-section {
-    padding: var(--spacing-sm) 0;
+    padding: var(--spacing-md) 0;
   }
 
   .gift-title {
-    font-size: clamp(20px, 5vw, 22px);
+    font-size: clamp(22px, 7vw, 30px);
   }
 
-  .gift-description {
-    font-size: var(--font-sm);
-    line-height: 1.6;
+  .accent-line {
+    height: 3px;
+    margin: 16px auto 0;
   }
 
-  .gift-button :deep(.template-btn) {
-    min-width: 280px !important;
+  .gift-subtitle {
+    font-size: 14px;
+    margin: var(--spacing-md) 0 var(--spacing-md);
+  }
+
+  .certs-wrapper {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .cert-card {
+    border-radius: 16px;
+  }
+
+  .cert-image-box {
+    aspect-ratio: 1.6;
+    padding: var(--spacing-lg);
+  }
+
+  .cert-name {
+    font-size: 15px;
+  }
+
+  .cta-wrapper :deep(.template-btn) {
+    min-width: 260px !important;
     max-width: 340px !important;
-    padding: var(--spacing-md) var(--spacing-lg) !important;
-    border: 2px solid var(--c-white) !important;
+    height: 52px !important;
   }
 
-  .gift-button :deep(.template-btn__text) {
-    font-size: clamp(14px, 3vw, 18px) !important;
-  }
-
-  .gift-image-wrapper {
-    padding: var(--spacing-sm);
+  .cta-wrapper :deep(.template-btn__text) {
+    font-size: 15px !important;
   }
 }
 
 /* Адаптивность для очень маленьких экранов */
-@media (max-width: 400px) {
-  .gift-button :deep(.template-btn) {
-    min-width: 260px !important;
-    max-width: 320px !important;
-    padding: var(--spacing-sm) var(--spacing-md) !important;
-    border: 2px solid var(--c-white) !important;
+@media (max-width: 360px) {
+  .gift-title {
+    font-size: clamp(20px, 8vw, 26px);
   }
 
-  .gift-button :deep(.template-btn__text) {
-    font-size: 14px !important;
+  .certs-wrapper {
+    gap: var(--spacing-sm);
+  }
+
+  .cert-card {
+    border-radius: 14px;
+  }
+
+  .cert-image-box {
+    aspect-ratio: 1.5;
+    padding: var(--spacing-md);
+  }
+
+  .cert-name {
+    font-size: 13px;
+  }
+
+  .cta-wrapper :deep(.template-btn) {
+    min-width: 220px !important;
+    height: 48px !important;
   }
 }
 </style>

@@ -9,6 +9,7 @@ export const createProductsTable = `
     price DECIMAL(10, 2) NOT NULL,
     category VARCHAR(50) NOT NULL,
     category_name VARCHAR(100) NOT NULL,
+    status VARCHAR(20) DEFAULT 'in_stock',
     image VARCHAR(500),
     images JSON,
     features JSON,
@@ -18,6 +19,19 @@ export const createProductsTable = `
     INDEX idx_price (price)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 `;
+
+// Миграция для добавления поля status
+export const addStatusColumn = async () => {
+  try {
+    await db.query(`
+      ALTER TABLE products 
+      ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'in_stock' 
+      AFTER category_name
+    `);
+  } catch (error) {
+    console.warn('Migration addStatusColumn warning:', error.message);
+  }
+};
 
 const normalizeProduct = (product) => {
   const parsedFeatures = typeof product.features === 'string' ? JSON.parse(product.features) : (product.features || []);
@@ -75,11 +89,11 @@ export const getCategories = async () => {
 
 // Создать товар
 export const createProduct = async (data) => {
-  const { name, description, price, category, category_name, images, features } = data;
+  const { name, description, price, category, category_name, images, features, status = 'in_stock' } = data;
   const firstImage = Array.isArray(images) && images.length > 0 ? images[0] : null;
   const query = `
-    INSERT INTO products (name, description, price, category, category_name, image, images, features) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO products (name, description, price, category, category_name, status, image, images, features) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
   const [result] = await db.query(query, [
     name,
@@ -87,6 +101,7 @@ export const createProduct = async (data) => {
     price,
     category,
     category_name,
+    status,
     firstImage,
     JSON.stringify(images || []),
     JSON.stringify(features || [])
@@ -96,7 +111,7 @@ export const createProduct = async (data) => {
 
 // Обновить товар
 export const updateProduct = async (id, data) => {
-  const { name, description, price, category, category_name, images, features } = data;
+  const { name, description, price, category, category_name, images, features, status } = data;
 
   // Если переданы новые изображения, обновляем их
   let updateData = {
@@ -105,7 +120,8 @@ export const updateProduct = async (id, data) => {
     price,
     category,
     category_name,
-    features
+    features,
+    status
   };
 
   if (images && Array.isArray(images) && images.length > 0) {
@@ -119,7 +135,7 @@ export const updateProduct = async (id, data) => {
   Object.keys(updateData).forEach(key => {
     if (updateData[key] !== undefined) {
       setParts.push(`${key} = ?`);
-      values.push(key === 'features' ? JSON.stringify(updateData[key]) : updateData[key]);
+      values.push(key === 'features' || key === 'images' ? JSON.stringify(updateData[key]) : updateData[key]);
     }
   });
 

@@ -141,15 +141,11 @@ const price5hours = computed(() => {
 
 const handleSubmit = () => {
   if (canSubmit.value) {
-    // Переход к оформлению заказа
-    const queryParams = new URLSearchParams({
-      hall: props.uniqueId,
-      time: localTime.value || '',
-      hours: localHours.value || '',
-      package: localPackage.value || ''
-    }).toString();
-    
-    window.location.href = `/buy-certificate?${queryParams}`;
+    emit('submit', {
+      time: localTime.value,
+      hours: localHours.value,
+      package: localPackage.value
+    });
   }
 };
 </script>

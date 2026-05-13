@@ -3,7 +3,6 @@
     <SiteHeader />
     
     <div class="product-container">
-      <!-- Хлебные крошки -->
       <nav class="breadcrumbs">
         <router-link to="/" class="breadcrumb-link">Главная</router-link>
         <span class="breadcrumb-separator">/</span>
@@ -12,83 +11,87 @@
         <span class="breadcrumb-current">{{ product?.name || 'Товар' }}</span>
       </nav>
       
-      <!-- Если загрузка -->
       <div v-if="loading" class="loading">
         <div class="loading-spinner"></div>
         <p>Загрузка товара...</p>
       </div>
       
-      <!-- Если ошибка -->
       <div v-else-if="error" class="error">
         <h2>{{ error }}</h2>
         <router-link to="/catalog" class="back-link">Вернуться в каталог</router-link>
       </div>
       
-      <!-- Если товар не найден -->
       <div v-else-if="!product" class="not-found">
         <h2>Товар не найден</h2>
         <router-link to="/catalog" class="back-link">Вернуться в каталог</router-link>
       </div>
       
-      <!-- Карточка товара -->
-      <div v-else class="product-content">
-        <!-- Изображение -->
-        <div class="product-image-section">
-          <div class="product-image-wrapper">
-            <div class="product-main-image">
-              <img
-                v-if="currentImage"
-                :src="currentImage"
-                :alt="product.name"
-              />
-              <span v-else class="image-placeholder">{{ product.name }}</span>
+      <div v-else class="product-wrapper">
+        <!-- Верхний блок: изображение + информация -->
+        <div class="product-main-block">
+          <!-- Галерея -->
+          <div class="gallery-block">
+            <div class="main-image">
+              <img v-if="currentImage" :src="currentImage" :alt="product.name" />
+              <span v-else class="placeholder">{{ product.name }}</span>
             </div>
-            <div v-if="product.images?.length > 1" class="product-thumbnails">
-              <button
-                v-for="(image, index) in product.images"
-                :key="index"
-                :class="['thumbnail-button', { active: selectedImageIndex === index }]"
-                type="button"
-                @click="selectedImageIndex = index"
-              >
-                <img :src="image" :alt="product.name" />
-              </button>
+          </div>
+
+          <!-- Информация -->
+          <div class="info-block">
+            <div class="info-content">
+              <div class="meta">
+                <span class="sku">Артикул: {{ product.id }}</span>
+                <span class="stock" :style="{ color: stockStatus.color }">
+                  <span class="stock-dot" :style="{ background: stockStatus.color }"></span>
+                  {{ stockStatus.text }}
+                </span>
+              </div>
+              
+              <h1 class="product-title">{{ product.name }}</h1>
+              <div class="product-category">{{ product.category_name }}</div>
+              
+              <div class="price-wrapper">
+                <span class="product-price">{{ Math.round(product.price).toLocaleString('ru-RU') }} ₽</span>
+              </div>
+
+              <TemplateButton class="add-to-cart-btn" variant="outlined-white" @click="addToCart">
+                {{ addedToCart ? '✓ Добавлено' : 'В корзину' }}
+              </TemplateButton>
+
+              <div class="pickup-block">
+                <div class="pickup-label">Самовывоз</div>
+                <div class="pickup-address">г. Муром, ул. Московская, 91А</div>
+              </div>
             </div>
           </div>
         </div>
-        
-        <!-- Информация -->
-        <div class="product-info-section">
-            <div class="product-category-tag">{{ product.category_name }}</div>
-          <h1 class="product-title">{{ product.name }}</h1>
-          <p class="product-description">{{ product.description }}</p>
-          
-          <div class="product-price-section">
-            <span class="product-price">{{ product.price }} ₽</span>
-          </div>
-          
-          <!-- Характеристики -->
-          <div class="product-features">
-            <h3 class="features-title">Характеристики:</h3>
-            <ul class="features-list">
-              <li v-for="(feature, index) in product.features" :key="index" class="feature-item">
-                <span class="feature-check">✓</span>
-                {{ feature }}
-              </li>
+
+        <!-- Нижний блок: описание и характеристики -->
+        <div class="product-details-block">
+          <section v-if="product.description" class="details-section">
+            <h2 class="details-title">Описание</h2>
+            <p class="details-text">{{ product.description }}</p>
+          </section>
+
+          <section v-if="normalizedFeatures.length || legacyFeatures.length" class="details-section">
+            <h2 class="details-title">Характеристики</h2>
+            <table v-if="normalizedFeatures.length" class="specs-table">
+              <tbody>
+                <tr v-for="(f, i) in normalizedFeatures" :key="i">
+                  <td class="spec-name">{{ f.key }}</td>
+                  <td class="spec-value">{{ f.value }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <ul v-if="legacyFeatures.length" class="features-list">
+              <li v-for="(f, i) in legacyFeatures" :key="i">{{ f }}</li>
             </ul>
-          </div>
-          
-          <!-- Кнопки -->
-          <div class="product-actions">
-            <TemplateButton variant="outlined-white" @click="addToCart" class="cart-btn">
-              Добавить в корзину
-            </TemplateButton>
-            <router-link to="/catalog" class="back-btn">
-              <TemplateButton variant="secondary">
-                Вернуться в каталог
-              </TemplateButton>
-            </router-link>
-          </div>
+          </section>
+        </div>
+
+        <div class="back-block">
+          <router-link to="/catalog" class="back-link">← Вернуться в каталог</router-link>
         </div>
       </div>
     </div>
@@ -102,9 +105,12 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import SiteHeader from '../components/header/SiteHeader.vue';
 import SiteFooter from '../components/footer/SiteFooter.vue';
+import { useCart } from '../composables/useCart.js';
+import { resolveImageUrl } from '../utils/imageUrl.js';
 import TemplateButton from '../components/TemplateButton.vue';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const { addProduct } = useCart();
 
 const route = useRoute();
 const router = useRouter();
@@ -112,30 +118,35 @@ const router = useRouter();
 const product = ref(null);
 const loading = ref(true);
 const error = ref(null);
-const selectedImageIndex = ref(0);
+const addedToCart = ref(false);
 
 const currentImage = computed(() => {
   if (!product.value) return null;
-  return product.value.images?.[selectedImageIndex.value] || product.value.image || null;
+  const raw = product.value.images?.[0] || product.value.image || null;
+  return raw ? resolveImageUrl(raw) : null;
 });
 
-const productId = computed(() => {
-  return parseInt(route.params.id);
+const normalizedFeatures = computed(() => {
+  if (!product.value?.features) return [];
+  return product.value.features.filter(f => typeof f === 'object' && f !== null && f.key);
 });
+
+const legacyFeatures = computed(() => {
+  if (!product.value?.features) return [];
+  return product.value.features.filter(f => typeof f === 'string');
+});
+
+const productId = computed(() => parseInt(route.params.id));
 
 onMounted(async () => {
   try {
     loading.value = true;
     const res = await fetch(`${API_URL}/api/products/${productId.value}`);
     const data = await res.json();
-    
-    if (data.success) {
-      product.value = data.data;
-    } else {
-      router.push('/catalog');
-    }
+    if (data.success) product.value = data.data;
+    else router.push('/catalog');
   } catch (err) {
-    console.error('Error loading product:', err);
+    console.error(err);
     error.value = 'Не удалось загрузить товар';
   } finally {
     loading.value = false;
@@ -143,11 +154,27 @@ onMounted(async () => {
 });
 
 const addToCart = () => {
-  if (product.value) {
-    console.log('Добавлено в корзину:', product.value);
-    alert(`${product.value.name} добавлен в корзину!`);
+  if (!product.value) return;
+  addProduct(product.value);
+  addedToCart.value = true;
+  setTimeout(() => (addedToCart.value = false), 2000);
+};
+
+const getStockStatus = () => {
+  if (!product.value?.status) return { text: 'В наличии', color: '#34d399' };
+  switch (product.value.status) {
+    case 'in_stock':
+      return { text: 'В наличии', color: '#34d399' };
+    case 'preorder':
+      return { text: 'Под заказ', color: '#fbbf24' };
+    case 'out_of_stock':
+      return { text: 'Нет в наличии', color: '#f87171' };
+    default:
+      return { text: 'В наличии', color: '#34d399' };
   }
 };
+
+const stockStatus = computed(() => getStockStatus());
 </script>
 
 <style scoped>
@@ -161,246 +188,296 @@ const addToCart = () => {
 .product-container {
   flex: 1;
   width: 100%;
-  max-width: 1300px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: var(--spacing-xl) var(--spacing-md);
+  padding: 120px 24px 60px;
 }
 
+/* Хлебные крошки */
 .breadcrumbs {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-xl);
+  gap: 10px;
+  margin-bottom: 32px;
   font-family: "Roboto", sans-serif;
-  font-size: var(--font-sm);
-  color: var(--c-white-60);
+  font-size: 14px;
+  color: var(--c-white-50);
 }
 
 .breadcrumb-link {
   color: var(--c-white-60);
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: color 0.2s;
 }
 
 .breadcrumb-link:hover {
-  color: var(--c-white);
+  color: var(--c-accent);
 }
 
 .breadcrumb-separator {
-  color: var(--c-white-40);
+  color: var(--c-white-30);
 }
 
-.breadcrumb-current {
-  color: var(--c-white);
-}
-
-.not-found {
+/* Загрузка / ошибка */
+.loading, .error, .not-found {
   text-align: center;
-  padding: var(--spacing-2xl);
-}
-
-.not-found h2 {
-  font-family: "Bowler", sans-serif;
-  font-size: var(--font-2xl);
-  color: var(--c-white);
-  margin-bottom: var(--spacing-lg);
-}
-
-.loading {
-  text-align: center;
-  padding: var(--spacing-2xl);
+  padding: 80px 20px;
 }
 
 .loading-spinner {
-  width: 60px;
-  height: 60px;
-  border: 4px solid var(--c-white-20);
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--c-white-20);
   border-top-color: var(--c-accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 0 auto var(--spacing-lg);
+  margin: 0 auto 20px;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-.loading p {
-  font-family: "Roboto", sans-serif;
-  font-size: var(--font-lg);
-  color: var(--c-white-60);
-}
-
-.error {
-  text-align: center;
-  padding: var(--spacing-2xl);
-}
-
-.error h2 {
-  font-family: "Bowler", sans-serif;
-  font-size: var(--font-2xl);
-  color: var(--c-danger);
-  margin-bottom: var(--spacing-lg);
-}
-
-.error p {
-  font-family: "Roboto", sans-serif;
-  font-size: var(--font-lg);
-  color: var(--c-white-60);
-}
-
 .back-link {
-  display: inline-block;
-  color: var(--c-accent);
+  color: var(--c-white-60);
   text-decoration: none;
   font-family: "Roboto", sans-serif;
-  font-size: var(--font-lg);
-  transition: color 0.3s ease;
+  font-size: 14px;
+  transition: color 0.2s;
 }
 
 .back-link:hover {
-  color: var(--c-white);
+  color: var(--c-accent);
 }
 
-.product-content {
+/* === Основной враппер === */
+.product-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* === Верхний блок === */
+.product-main-block {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-xl);
-  align-items: start;
-}
-
-.product-image-section {
-  display: flex;
-  justify-content: center;
-}
-
-.product-image-wrapper {
-  width: 100%;
-  max-width: 500px;
-  aspect-ratio: 1;
-  background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-secondary) 100%);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  gap: 40px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  padding: 32px;
   overflow: hidden;
 }
 
-.product-main-image {
+/* Галерея */
+.gallery-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.main-image {
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-secondary) 100%);
+  border-radius: 24px;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.product-main-image img {
+.main-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  border-radius: 16px;
 }
 
-.product-thumbnails {
+.placeholder {
+  font-family: "Bowler", sans-serif;
+  font-size: 22px;
+  color: var(--c-white);
+  text-align: center;
+  padding: 30px;
+}
+
+/* Инфо блок */
+.info-block {
   display: flex;
-  gap: 12px;
-  margin-top: 16px;
+  flex-direction: column;
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
-.thumbnail-button {
-  width: 72px;
-  height: 72px;
-  border: 2px solid transparent;
-  border-radius: 16px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.08);
-  cursor: pointer;
-  padding: 0;
-}
-
-.thumbnail-button.active {
-  border-color: var(--c-accent);
-}
-
-.thumbnail-button img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.image-placeholder {
-  font-family: "Bowler", sans-serif;
-  font-size: clamp(20px, 4vw, 28px);
-  color: var(--c-white);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  text-align: center;
-  padding: var(--spacing-md);
-}
-
-.product-info-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.product-category-tag {
-  display: inline-block;
+.sku {
   font-family: "Roboto", sans-serif;
-  font-size: var(--font-sm);
-  color: var(--c-white-60);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border: 1px solid var(--c-white-30);
-  border-radius: 4px;
-  align-self: flex-start;
+  font-size: 13px;
+  color: var(--c-white-50);
+}
+
+.stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Roboto", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #34d399;
+}
+
+.stock-dot {
+  width: 8px;
+  height: 8px;
+  background: #34d399;
+  border-radius: 50%;
 }
 
 .product-title {
   font-family: "Bowler", sans-serif;
-  font-size: clamp(28px, 4vw, 42px);
+  font-size: clamp(24px, 3vw, 32px);
   font-weight: 400;
   color: var(--c-white);
   margin: 0;
+  line-height: 1.3;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 1.2;
 }
 
-.product-description {
+.product-category {
   font-family: "Roboto", sans-serif;
-  font-size: var(--font-lg);
-  color: var(--c-white-70);
-  line-height: 1.6;
-  margin: 0;
+  font-size: 14px;
+  color: var(--c-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
 }
 
-.product-price-section {
-  margin: var(--spacing-md) 0;
+.price-wrapper {
+  display: inline-flex;
 }
 
 .product-price {
   font-family: "Bowler", sans-serif;
-  font-size: clamp(32px, 5vw, 48px);
-  font-weight: 400;
+  font-size: clamp(28px, 3vw, 36px);
   color: var(--c-accent);
+  font-weight: 400;
 }
 
-.product-features {
-  margin: var(--spacing-lg) 0;
-  padding: var(--spacing-md);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+.add-to-cart-btn {
+  width: clamp(160px, 25vw, 230px);
 }
 
-.features-title {
-  font-family: "Bowler", sans-serif;
-  font-size: var(--font-lg);
-  color: var(--c-white);
-  margin: 0 0 var(--spacing-md) 0;
+.add-to-cart-btn.added {
+  border-color: #34d399;
+}
+
+.add-to-cart-btn.added .template-btn__text {
+  color: #34d399;
+}
+
+.pickup-block {
+  margin-top: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+}
+
+.pickup-label {
+  font-family: "Roboto", sans-serif;
+  font-size: 12px;
+  color: var(--c-white-50);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.pickup-address {
+  font-family: "Roboto", sans-serif;
+  font-size: 15px;
+  color: var(--c-white);
+  margin-bottom: 4px;
+}
+
+.pickup-time {
+  font-family: "Roboto", sans-serif;
+  font-size: 13px;
+  color: var(--c-white-60);
+}
+
+/* === Нижний блок === */
+.product-details-block {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.details-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.details-title {
+  font-family: "Bowler", sans-serif;
+  font-size: 20px;
+  color: var(--c-white);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.details-text {
+  font-family: "Roboto", sans-serif;
+  font-size: 15px;
+  color: var(--c-white-70);
+  line-height: 1.7;
+  margin: 0;
+}
+
+.specs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.specs-table tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.specs-table tr:last-child {
+  border-bottom: none;
+}
+
+.specs-table td {
+  padding: 14px 0;
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  vertical-align: top;
+}
+
+.spec-name {
+  color: var(--c-white-50);
+  width: 45%;
+  padding-right: 24px;
+}
+
+.spec-value {
+  color: var(--c-white);
 }
 
 .features-list {
@@ -409,131 +486,75 @@ const addToCart = () => {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 10px;
 }
 
-.feature-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+.features-list li {
   font-family: "Roboto", sans-serif;
-  font-size: var(--font-md);
+  font-size: 14px;
   color: var(--c-white-70);
+  padding-left: 18px;
+  position: relative;
 }
 
-.feature-check {
+.features-list li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
   color: var(--c-accent);
-  font-weight: bold;
-  font-size: var(--font-lg);
 }
 
-.product-actions {
-  display: flex;
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
-  margin-top: var(--spacing-lg);
+.back-block {
+  padding: 8px 0;
 }
 
-.cart-btn,
-.back-btn :deep(.template-btn) {
-  min-width: 200px;
-  height: 55px;
-}
-
-/* Адаптивность для десктопов */
-@media (min-width: 1400px) {
-  .product-container {
-    padding: calc(var(--spacing-xl) * 1.2) var(--spacing-md);
-  }
-}
-
-/* Адаптивность для планшетов */
+/* === Адаптив === */
 @media (max-width: 900px) {
-  .product-container {
-    padding: var(--spacing-lg) var(--spacing-md);
-  }
-
-  .product-content {
+  .product-main-block {
     grid-template-columns: 1fr;
-    gap: var(--spacing-lg);
+    gap: 32px;
   }
 
-  .product-image-wrapper {
-    max-width: 400px;
+  .gallery-block {
+    max-width: 500px;
     margin: 0 auto;
-  }
-
-  .product-actions {
-    flex-direction: column;
-  }
-
-  .cart-btn,
-  .back-btn :deep(.template-btn) {
     width: 100%;
-    max-width: 300px;
-  }
-}
-
-/* Адаптивность для мобильных */
-@media (max-width: 600px) {
-  .product-container {
-    padding: var(--spacing-md) var(--spacing-sm);
   }
 
-  .breadcrumbs {
-    font-size: var(--font-xs);
-    flex-wrap: wrap;
+  .info-content {
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
   }
 
-  .product-title {
-    font-size: clamp(22px, 5vw, 28px);
-  }
-
-  .product-price {
-    font-size: clamp(24px, 5vw, 36px);
-  }
-
-  .product-description {
-    font-size: var(--font-md);
-  }
-
-  .features-title {
-    font-size: var(--font-base);
-  }
-
-  .feature-item {
-    font-size: var(--font-sm);
-  }
-
-  .product-actions {
-    flex-direction: column;
-    gap: var(--spacing-sm);
-  }
-
-  .cart-btn,
-  .back-btn :deep(.template-btn) {
+  .add-to-cart-btn {
     width: 100%;
     max-width: none;
-    height: 50px;
   }
 }
 
-/* Адаптивность для маленьких мобильных */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .product-container {
-    padding: var(--spacing-sm) var(--spacing-xs);
+    padding: 100px 16px 48px;
+  }
+
+  .product-main-block,
+  .product-details-block {
+    padding: 24px 20px;
+    border-radius: 20px;
   }
 
   .product-title {
-    font-size: clamp(20px, 5vw, 24px);
+    font-size: 22px;
   }
 
   .product-price {
-    font-size: clamp(20px, 5vw, 28px);
+    font-size: 28px;
   }
 
-  .image-placeholder {
-    font-size: clamp(14px, 3vw, 18px);
+  .add-to-cart-btn {
+    padding: 14px 24px;
+    font-size: 15px;
   }
 }
 </style>

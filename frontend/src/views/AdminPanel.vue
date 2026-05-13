@@ -36,6 +36,12 @@
           Пользователи
         </button>
         <button 
+          :class="['tab', { active: activeTab === 'orders' }]"
+          @click="activeTab = 'orders'; loadOrders()"
+        >
+          Заказы
+        </button>
+        <button 
           :class="['tab', { active: activeTab === 'certificates' }]"
           @click="activeTab = 'certificates'; loadCertificates()"
         >
@@ -99,6 +105,63 @@
               Добавить время
             </button>
           </div>
+        </div>
+      </div>
+
+      <!-- Секция заказов -->
+      <div v-if="activeTab === 'orders'" class="admin-section">
+        <h2>Заказы</h2>
+
+        <div v-if="loading" class="loading">Загрузка...</div>
+        
+        <div v-else-if="error" class="error">{{ error }}</div>
+        
+        <div v-else-if="orders.length === 0" class="empty">
+          Нет заказов
+        </div>
+        
+        <div v-else class="orders-table">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Телефон</th>
+                <th>Состав</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Дата</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="order in orders" :key="order.id">
+                <td>{{ order.id }}</td>
+                <td>{{ order.phone }}</td>
+                <td>
+                  <div class="order-items-preview">
+                    <span v-for="(item, idx) in order.items" :key="idx" class="order-item-tag">
+                      {{ item.name }} x{{ item.quantity }}
+                    </span>
+                  </div>
+                </td>
+                <td>{{ order.total_price }} ₽</td>
+                <td>
+                  <select
+                    :value="order.status"
+                    @change="updateOrderStatus(order.id, $event.target.value)"
+                    class="status-select"
+                    :class="'status-' + order.status"
+                  >
+                    <option value="pending">Ожидает</option>
+                    <option value="paid">Оплачен</option>
+                    <option value="ready">Готов к выдаче</option>
+                    <option value="completed">Выдан</option>
+                    <option value="cancelled">Отменён</option>
+                  </select>
+                </td>
+                <td>{{ formatDate(order.created_at) }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -306,6 +369,7 @@ const router = useRouter();
 const activeTab = ref('users');
 const users = ref([]);
 const certificates = ref([]);
+const orders = ref([]);
 const loading = ref(false);
 const error = ref('');
 
@@ -487,6 +551,65 @@ async function loadCertificates() {
     error.value = err.message;
   } finally {
     loading.value = false;
+  }
+}
+
+async function loadOrders() {
+  loading.value = true;
+  error.value = '';
+
+  try {
+    const userStr = localStorage.getItem('user');
+    const user = JSON.parse(userStr);
+
+    const response = await fetch(`${API_URL}/api/admin/orders`, {
+      headers: {
+        'X-User': encodeURIComponent(JSON.stringify(user))
+      }
+    });
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        router.push('/login');
+        return;
+      }
+      throw new Error('Не удалось загрузить заказы');
+    }
+
+    const data = await response.json();
+    orders.value = data.orders || [];
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function updateOrderStatus(id, newStatus) {
+  try {
+    const userStr = localStorage.getItem('user');
+    const admin = JSON.parse(userStr);
+
+    const response = await fetch(`${API_URL}/api/admin/orders/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User': encodeURIComponent(JSON.stringify(admin))
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
+
+    if (!response.ok) {
+      throw new Error('Не удалось обновить статус');
+    }
+
+    const index = orders.value.findIndex(o => o.id === id);
+    if (index !== -1) {
+      orders.value[index].status = newStatus;
+    }
+  } catch (err) {
+    console.error('Update order status error:', err);
+    alert('Не удалось обновить статус заказа');
   }
 }
 
@@ -962,15 +1085,16 @@ h1 {
 }
 
 .add-time-btn {
-  padding: 10px 20px;
-  background: rgba(0, 140, 209, 0.2);
+  padding: 12px 24px;
+  background: transparent;
   border: 2px solid rgba(0, 140, 209, 0.4);
   color: var(--c-accent);
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: var(--font-sm);
-  font-family: "Roboto", sans-serif;
-  font-weight: 500;
+  font-family: "Bowler", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   transition: all 0.3s ease;
 }
 
@@ -1256,6 +1380,68 @@ select option {
 .status-cancelled {
   background: rgba(231, 76, 60, 0.2);
   color: #e74c3c;
+}
+
+/* Таблица заказов */
+.orders-table {
+  overflow-x: auto;
+}
+
+.orders-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orders-table th,
+.orders-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.orders-table th {
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-sm);
+  color: var(--c-white);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.orders-table td {
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-sm);
+  color: var(--c-white);
+}
+
+.orders-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.order-items-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.order-item-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  font-size: var(--font-xs);
+  color: var(--c-white-80);
+  white-space: nowrap;
+}
+
+.status-ready {
+  background: rgba(155, 89, 182, 0.2);
+  color: #9b59b6;
+}
+
+.status-completed {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
 }
 
 /* Адаптивность */

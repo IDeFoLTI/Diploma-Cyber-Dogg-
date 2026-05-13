@@ -94,6 +94,37 @@
             </div>
           </div>
           
+          <!-- Заказы товаров -->
+          <div class="orders-section" v-if="user.phone">
+            <h2 class="section-title">Мои заказы</h2>
+            <div v-if="loadingOrders" class="time-loading">Загрузка...</div>
+            <div v-else-if="ordersError" class="time-error">{{ ordersError }}</div>
+            <div v-else-if="orders.length === 0" class="empty-orders">
+              У вас пока нет заказов
+            </div>
+            <div v-else class="orders-list">
+              <div v-for="order in orders" :key="order.id" class="order-card">
+                <div class="order-header">
+                  <span class="order-id">Заказ #{{ order.id }}</span>
+                  <span :class="['order-status', 'status-' + order.status]">
+                    {{ formatOrderStatus(order.status) }}
+                  </span>
+                </div>
+                <div class="order-items">
+                  <div v-for="(item, idx) in order.items" :key="idx" class="order-item-row">
+                    <span class="item-name">{{ item.name }}</span>
+                    <span class="item-qty">x{{ item.quantity }}</span>
+                    <span class="item-price">{{ item.price }} ₽</span>
+                  </div>
+                </div>
+                <div class="order-footer">
+                  <span class="order-date">{{ formatDate(order.created_at) }}</span>
+                  <span class="order-total">Итого: {{ order.total_price }} ₽</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <button class="logout-btn" @click="handleLogout">
             Выйти
           </button>
@@ -135,12 +166,19 @@ const balance = ref({
 const loadingTime = ref(false);
 const timeError = ref('');
 
+const orders = ref([]);
+const loadingOrders = ref(false);
+const ordersError = ref('');
+
 onMounted(() => {
   const storedUser = localStorage.getItem('user');
   if (storedUser) {
     try {
       user.value = JSON.parse(storedUser);
       loadGameTimeBalance();
+      if (user.value.phone) {
+        loadOrders();
+      }
     } catch (err) {
       localStorage.removeItem('user');
     }
@@ -182,6 +220,47 @@ const handleLogout = () => {
 const goToLogin = () => {
   router.push('/login');
 };
+
+async function loadOrders() {
+  if (!user.value) return;
+  loadingOrders.value = true;
+  ordersError.value = '';
+  try {
+    const response = await fetch(`${API_URL}/api/orders/my`, {
+      headers: { 'X-User': encodeURIComponent(JSON.stringify(user.value)) }
+    });
+    if (!response.ok) throw new Error('Не удалось загрузить заказы');
+    const data = await response.json();
+    orders.value = data.orders || [];
+  } catch (err) {
+    ordersError.value = err.message;
+  } finally {
+    loadingOrders.value = false;
+  }
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  const date = new Date(dateStr);
+  return date.toLocaleString('ru-RU', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function formatOrderStatus(status) {
+  const map = {
+    pending: 'Ожидает оплаты',
+    paid: 'Оплачен',
+    ready: 'Готов к выдаче',
+    completed: 'Выдан',
+    cancelled: 'Отменён'
+  };
+  return map[status] || status;
+}
 
 const goToResetPassword = () => {
   router.push('/forgot-password');
@@ -475,6 +554,150 @@ const goToResetPassword = () => {
   border-color: var(--c-accent);
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(0, 140, 209, 0.2);
+}
+
+/* Заказы */
+.orders-section {
+  margin-top: var(--spacing-md);
+}
+
+.empty-orders {
+  text-align: center;
+  padding: var(--spacing-lg);
+  color: rgba(255, 255, 255, 0.4);
+  font-family: "Roboto", sans-serif;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.order-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: var(--spacing-lg);
+  transition: all 0.3s ease;
+}
+
+.order-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.order-id {
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-md);
+  color: var(--c-white);
+}
+
+.order-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-pending {
+  background: rgba(241, 196, 15, 0.2);
+  color: #f1c40f;
+}
+
+.status-paid {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+}
+
+.status-ready {
+  background: rgba(155, 89, 182, 0.2);
+  color: #9b59b6;
+}
+
+.status-completed {
+  background: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+}
+
+.status-used {
+  background: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+}
+
+.status-cancelled {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+}
+
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.order-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.order-item-row .item-name {
+  flex: 1;
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-sm);
+  color: var(--c-white);
+}
+
+.order-item-row .item-qty {
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-sm);
+  color: var(--c-white-60);
+  margin: 0 var(--spacing-md);
+}
+
+.order-item-row .item-price {
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-sm);
+  color: var(--c-accent);
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.order-date {
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-xs);
+  color: var(--c-white-50);
+}
+
+.order-total {
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-md);
+  color: var(--c-accent);
 }
 
 /* Адаптивность */

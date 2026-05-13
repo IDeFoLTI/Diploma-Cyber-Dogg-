@@ -261,16 +261,6 @@ const submitForm = async () => {
   line-height: 1.2;
 }
 
-.reservation-title::after {
-  content: "";
-  display: block;
-  width: clamp(60px, 10vw, 100px);
-  height: 3px;
-  background: var(--c-accent);
-  margin: 20px auto 0;
-  border-radius: 2px;
-}
-
 .reservation-content {
   display: flex;
   gap: var(--spacing-xl);
@@ -448,6 +438,11 @@ const submitForm = async () => {
   margin-top: var(--spacing-sm);
 }
 
+.reservation-btn {
+  width: 100% !important;
+  margin-top: var(--spacing-sm);
+}
+
 .reservation-btn :deep(.template-btn) {
   width: 100% !important;
   min-width: auto !important;
@@ -458,7 +453,6 @@ const submitForm = async () => {
   background: transparent !important;
   transition: all 0.3s ease !important;
   padding: var(--spacing-md) var(--spacing-xl) !important;
-  margin-top: var(--spacing-sm);
 }
 
 .reservation-btn :deep(.template-btn__text) {

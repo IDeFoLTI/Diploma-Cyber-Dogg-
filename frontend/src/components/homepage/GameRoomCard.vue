@@ -153,7 +153,7 @@ defineProps({
 .room-card__feature {
   font-family: "Roboto";
   font-size: clamp(15px, 1.5vw, 16px);
-  font-weight: 600;
+  font-weight: 400;
   color: var(--c-white);
   padding-left: 20px;
   position: relative;

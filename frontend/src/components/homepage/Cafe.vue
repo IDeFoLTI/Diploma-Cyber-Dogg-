@@ -66,16 +66,6 @@ const burgerImage = '/img/burgerCafe.png';
   line-height: 1.2;
 }
 
-.cafe-section__title::after {
-  content: "";
-  display: block;
-  width: clamp(60px, 10vw, 100px);
-  height: 3px;
-  background: var(--c-accent);
-  margin: 20px auto 0;
-  border-radius: 2px;
-}
-
 .container {
   width: 100%;
   max-width: 1300px;
@@ -165,7 +155,7 @@ const burgerImage = '/img/burgerCafe.png';
 .cafe-text-paragraph {
   font-family: "Roboto", sans-serif;
   font-size: clamp(0.9rem, 1.8vw, 1.1rem);
-  font-weight: 600;
+  font-weight: 400;
   color: var(--c-white);
   line-height: 1.6;
   text-align: left;

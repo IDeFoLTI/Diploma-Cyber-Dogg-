@@ -11,6 +11,7 @@ import { createCertificateOrdersTable } from "./models/CertificateOrder.js";
 import { createMenuTables, createMenuItemsTable } from "./models/Menu.js";
 import { createPriceZonesTable, createZonePricesTable } from "./models/PriceZone.js";
 import { createProductsTable } from "./models/Product.js";
+import { createOrdersTable, createOrderItemsTable } from "./models/Order.js";
 import { authRoutes, userRoutes } from "./routes/userRoutes.js";
 import { reservationRoutes } from "./routes/reservationRoutes.js";
 import { adminRoutes } from "./routes/adminRoutes.js";
@@ -19,6 +20,7 @@ import { certificateRoutes } from "./routes/certificateRoutes.js";
 import { menuRoutes } from "./routes/menuRoutes.js";
 import { priceRoutes } from "./routes/priceRoutes.js";
 import { productRoutes } from "./routes/productRoutes.js";
+import { orderRoutes } from "./routes/orderRoutes.js";
 
 const app = Fastify({ logger: true });
 
@@ -50,7 +52,6 @@ const start = async () => {
     }
 
     await app.register(multipart, {
-      attachFieldsToBody: false,
       limits: {
         files: 3,
         fieldNameSize: 100,
@@ -81,6 +82,31 @@ const start = async () => {
     console.log("✅ Zone prices table initialized");
     await db.query(createProductsTable);
     console.log("✅ Products table initialized");
+    // Миграция: добавить недостающие колонки, если таблица создавалась раньше
+    try {
+      await db.query("ALTER TABLE products ADD COLUMN image VARCHAR(500)");
+      console.log("✅ Added 'image' column to products");
+    } catch (_) { /* уже есть */ }
+    try {
+      await db.query("ALTER TABLE products ADD COLUMN images JSON");
+      console.log("✅ Added 'images' column to products");
+    } catch (_) { /* уже есть */ }
+    try {
+      await db.query("ALTER TABLE products ADD COLUMN features JSON");
+      console.log("✅ Added 'features' column to products");
+    } catch (_) { /* уже есть */ }
+    try {
+      await db.query("ALTER TABLE products ADD COLUMN category_name VARCHAR(100) NOT NULL DEFAULT ''");
+      console.log("✅ Added 'category_name' column to products");
+    } catch (_) { /* уже есть */ }
+    try {
+      await db.query("ALTER TABLE products ADD COLUMN status VARCHAR(20) DEFAULT 'in_stock'");
+      console.log("✅ Added 'status' column to products");
+    } catch (_) { /* уже есть */ }
+    await db.query(createOrdersTable);
+    console.log("✅ Orders table initialized");
+    await db.query(createOrderItemsTable);
+    console.log("✅ Order items table initialized");
     console.log("✅ Database initialized");
     
     // Роуты
@@ -142,6 +168,11 @@ const start = async () => {
     productRoutes(app);
     console.log("✅ Product routes registered");
     
+    // Подключаем роуты заказов
+    console.log("🔄 Registering order routes...");
+    orderRoutes(app);
+    console.log("✅ Order routes registered");
+
     // Запуск сервера
     console.log(`🔄 Starting server on http://${host}:${port}...`);
     await app.listen({ port, host });

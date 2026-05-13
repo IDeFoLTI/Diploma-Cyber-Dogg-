@@ -5,7 +5,6 @@ import { authenticateAdmin } from "../middleware/auth.js";
 import { createProduct, getAllProducts, updateProduct, deleteProduct } from "../models/Product.js";
 import { db } from "../db.js";
 import fs from "fs";
-import { pipeline } from "stream/promises";
 
 export async function adminRoutes(app) {
   // Получить все бронирования
@@ -287,9 +286,9 @@ export async function adminRoutes(app) {
       const images = [];
 
       for await (const part of parts) {
-        if (part.type === 'file' && part.fieldname === 'images') {
+        if (part.type === 'file') {
           if (images.length >= 3) {
-            await part.file.resume();
+            await part.toBuffer();
             continue;
           }
 
@@ -298,12 +297,10 @@ export async function adminRoutes(app) {
             : `image_${Date.now()}`;
           const filename = `${Date.now()}-${safeName}`;
           const targetPath = new URL(`../uploads/products/${filename}`, import.meta.url);
-          const writeStream = fs.createWriteStream(targetPath);
-          await pipeline(part.file, writeStream);
+          const buffer = await part.toBuffer();
+          fs.writeFileSync(targetPath, buffer);
           images.push(`/uploads/products/${filename}`);
-        }
-
-        if (part.type === 'field') {
+        } else {
           data[part.fieldname] = part.value;
         }
       }
@@ -313,7 +310,16 @@ export async function adminRoutes(app) {
       const price = parseFloat(data.price);
       const category = data.category?.trim();
       const category_name = data.category_name?.trim();
-      const features = data.features ? data.features.split(',').map(item => item.trim()).filter(Boolean) : [];
+
+      let features = [];
+      if (data.features) {
+        const raw = data.features.trim();
+        if (raw.startsWith('[')) {
+          try { features = JSON.parse(raw); } catch { features = []; }
+        } else {
+          features = raw.split(',').map(item => item.trim()).filter(Boolean);
+        }
+      }
 
       if (!name || !category || !category_name || Number.isNaN(price)) {
         return reply.status(400).send({
@@ -337,7 +343,7 @@ export async function adminRoutes(app) {
       request.log.error("Admin create product error:", err);
       return reply.status(500).send({
         error: "INTERNAL_ERROR",
-        message: "Не удалось добавить товар",
+        message: "Не удалось добавить товар: " + err.message,
       });
     }
   });
@@ -353,9 +359,9 @@ export async function adminRoutes(app) {
       const images = [];
 
       for await (const part of parts) {
-        if (part.type === 'file' && part.fieldname === 'images') {
+        if (part.type === 'file') {
           if (images.length >= 3) {
-            await part.file.resume();
+            await part.toBuffer();
             continue;
           }
 
@@ -364,12 +370,10 @@ export async function adminRoutes(app) {
             : `image_${Date.now()}`;
           const filename = `${Date.now()}-${safeName}`;
           const targetPath = new URL(`../uploads/products/${filename}`, import.meta.url);
-          const writeStream = fs.createWriteStream(targetPath);
-          await pipeline(part.file, writeStream);
+          const buffer = await part.toBuffer();
+          fs.writeFileSync(targetPath, buffer);
           images.push(`/uploads/products/${filename}`);
-        }
-
-        if (part.type === 'field') {
+        } else {
           data[part.fieldname] = part.value;
         }
       }
@@ -379,7 +383,17 @@ export async function adminRoutes(app) {
       const price = parseFloat(data.price);
       const category = data.category?.trim();
       const category_name = data.category_name?.trim();
-      const features = data.features ? data.features.split(',').map(item => item.trim()).filter(Boolean) : [];
+      const status = data.status?.trim() || 'in_stock';
+
+      let features = [];
+      if (data.features) {
+        const raw = data.features.trim();
+        if (raw.startsWith('[')) {
+          try { features = JSON.parse(raw); } catch { features = []; }
+        } else {
+          features = raw.split(',').map(item => item.trim()).filter(Boolean);
+        }
+      }
 
       if (!name || !category || !category_name || Number.isNaN(price)) {
         return reply.status(400).send({
@@ -394,7 +408,8 @@ export async function adminRoutes(app) {
         price,
         category,
         category_name,
-        images: images.length > 0 ? images : undefined, // не обновлять изображения, если не загружены новые
+        status,
+        images: images.length > 0 ? images : undefined,
         features
       });
 
@@ -403,7 +418,7 @@ export async function adminRoutes(app) {
       request.log.error("Admin update product error:", err);
       return reply.status(500).send({
         error: "INTERNAL_ERROR",
-        message: "Не удалось обновить товар",
+        message: "Не удалось обновить товар: " + err.message,
       });
     }
   });

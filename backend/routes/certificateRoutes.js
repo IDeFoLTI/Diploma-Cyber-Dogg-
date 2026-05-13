@@ -60,6 +60,41 @@ export async function certificateRoutes(app) {
     }
   });
 
+  // Получить мои сертификаты (по телефону из авторизации)
+  app.get("/api/certificates/my", async (request, reply) => {
+    try {
+      const userStr = request.headers["x-user"];
+      if (!userStr) {
+        return reply.status(401).send({
+          error: "UNAUTHORIZED",
+          message: "Требуется авторизация",
+        });
+      }
+
+      const user = JSON.parse(decodeURIComponent(userStr));
+      if (!user.phone) {
+        return reply.status(400).send({
+          error: "VALIDATION_ERROR",
+          message: "У пользователя не указан телефон",
+        });
+      }
+
+      const { db } = await import("../db.js");
+      const [orders] = await db.query(
+        "SELECT * FROM certificate_orders WHERE phone = ? ORDER BY created_at DESC",
+        [user.phone]
+      );
+
+      return reply.status(200).send({ orders });
+    } catch (err) {
+      request.log.error("Get my certificates error:", err);
+      return reply.status(500).send({
+        error: "INTERNAL_ERROR",
+        message: "Не удалось получить сертификаты",
+      });
+    }
+  });
+
   // Получить все заказы (админка)
   app.get("/api/certificates/orders", {
     preHandler: authenticateAdmin,

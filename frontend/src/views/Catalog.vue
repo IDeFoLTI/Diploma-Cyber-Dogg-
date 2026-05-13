@@ -70,20 +70,20 @@
               <div class="product-image">
                 <img
                   v-if="product.images?.length || product.image"
-                  :src="product.images?.[0] || product.image"
+                  :src="resolveImageUrl(product.images?.[0] || product.image)"
                   :alt="product.name"
                 />
                 <span v-else class="product-placeholder">{{ product.name }}</span>
               </div>
-              <div class="product-badge">Новинка</div>
             </div>
             <div class="product-info">
               <div class="product-category">{{ product.category_name || product.categoryName }}</div>
               <h3 class="product-name">{{ product.name }}</h3>
-              <p class="product-description">{{ product.description }}</p>
               <div class="product-footer">
                 <span class="product-price">{{ product.price }} ₽</span>
-                <span class="product-btn">Подробнее →</span>
+                <button class="product-add-btn" @click.prevent.stop="handleAddToCart(product, $event)">
+                  В корзину
+                </button>
               </div>
             </div>
           </div>
@@ -109,8 +109,11 @@
 import { ref, computed, onMounted } from 'vue';
 import SiteHeader from '../components/header/SiteHeader.vue';
 import SiteFooter from '../components/footer/SiteFooter.vue';
+import { useCart } from '../composables/useCart.js';
+import { resolveImageUrl } from '../utils/imageUrl.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const { addProduct } = useCart();
 
 const products = ref([]);
 const categories = ref([{ value: 'all', label: 'Все категории' }]);
@@ -182,6 +185,12 @@ const resetFilters = () => {
   selectedCategory.value = 'all';
   sortBy.value = 'default';
 };
+
+function handleAddToCart(product, event) {
+  event.preventDefault();
+  event.stopPropagation();
+  addProduct(product);
+}
 </script>
 
 <style scoped>
@@ -352,8 +361,8 @@ const resetFilters = () => {
 /* Сетка товаров */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-lg);
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xl);
   max-width: 1200px;
   margin: 0 auto;
   justify-content: center;
@@ -379,6 +388,8 @@ const resetFilters = () => {
   box-sizing: border-box;
   border: 1px solid var(--c-white-10);
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .product-card-link:hover .product-card {
@@ -432,6 +443,7 @@ const resetFilters = () => {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  flex: 1;
 }
 
 .product-category {
@@ -441,6 +453,7 @@ const resetFilters = () => {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .product-name {
@@ -452,22 +465,6 @@ const resetFilters = () => {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   line-height: 1.3;
-  min-height: 52px;
-  display: flex;
-  align-items: center;
-}
-
-.product-description {
-  font-family: "Roboto", sans-serif;
-  font-size: var(--font-sm);
-  color: var(--c-white-60);
-  margin: 0;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  min-height: 42px;
 }
 
 .product-footer {
@@ -477,13 +474,15 @@ const resetFilters = () => {
   margin-top: auto;
   padding-top: var(--spacing-md);
   border-top: 1px solid var(--c-white-10);
+  flex-shrink: 0;
 }
 
 .product-price {
   font-family: "Bowler", sans-serif;
-  font-size: var(--font-2xl);
+  font-size: var(--font-lg);
   font-weight: 400;
   color: var(--c-accent);
+  white-space: nowrap;
 }
 
 .product-btn {
@@ -586,18 +585,84 @@ const resetFilters = () => {
   color: var(--c-white);
 }
 
-/* Адаптивность */
-@media (max-width: 1200px) {
+/* Кнопка добавления в корзину */
+.product-add-btn {
+  font-family: "Roboto", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-white);
+  background: var(--c-accent);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.product-add-btn:hover {
+  background: var(--c-white);
+  color: var(--c-bg);
+  transform: translateY(-2px);
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .catalog-hero {
+    padding: var(--spacing-2xl) 0 var(--spacing-lg);
+  }
+
+  .catalog-hero-title {
+    font-size: clamp(32px, 5vw, 44px);
+  }
+
+  .catalog-container {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .catalog-filters {
+    gap: var(--spacing-md);
+  }
+
   .products-grid {
     grid-template-columns: repeat(3, 1fr);
-    max-width: 900px;
+    gap: var(--spacing-lg);
+  }
+
+  .product-info {
+    padding: var(--spacing-md);
+  }
+
+  .product-name {
+    font-size: var(--font-md);
   }
 }
 
-@media (max-width: 900px) {
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .catalog-hero {
+    padding: var(--spacing-xl) 0 var(--spacing-md);
+  }
+
+  .catalog-hero-title {
+    font-size: clamp(26px, 6vw, 36px);
+    letter-spacing: 0.08em;
+  }
+
+  .catalog-hero-subtitle {
+    font-size: var(--font-sm);
+  }
+
+  .catalog-container {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+
   .catalog-filters {
     flex-direction: column;
     align-items: stretch;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
   }
 
   .filters-left,
@@ -609,53 +674,127 @@ const resetFilters = () => {
     justify-content: flex-start;
     overflow-x: auto;
     padding-bottom: var(--spacing-sm);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .category-btn {
+    font-size: 13px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    white-space: nowrap;
   }
 
   .filters-right {
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
   }
 
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: 700px;
-  }
-}
-
-@media (max-width: 600px) {
-  .catalog-hero {
-    padding: var(--spacing-xl) 0 var(--spacing-lg);
-  }
-
-  .catalog-hero-title {
-    font-size: clamp(28px, 5vw, 36px);
-  }
-
-  .catalog-container {
-    padding: var(--spacing-lg) var(--spacing-sm);
-  }
-
-  .products-grid {
-    grid-template-columns: 1fr;
-    max-width: 400px;
+  .filter-sort {
+    min-width: 140px;
   }
 
   .sort-select {
     min-width: 140px;
+    font-size: 14px;
+  }
+
+  .products-count {
+    font-size: 13px;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  .product-card {
+    border-radius: 12px;
+  }
+
+  .product-image-wrapper {
+    border-radius: 12px 12px 0 0;
+  }
+
+  .product-info {
+    padding: var(--spacing-md);
+    gap: var(--spacing-xs);
+  }
+
+  .product-category {
+    font-size: 11px;
   }
 
   .product-name {
-    min-height: 44px;
-    font-size: var(--font-base);
+    font-size: 14px;
+    line-height: 1.2;
   }
 
-  .product-description {
-    min-height: 36px;
+  .product-footer {
+    gap: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+  }
+
+  .product-price {
+    font-size: var(--font-md);
+  }
+
+  .product-add-btn {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+
+  .no-products {
+    padding: var(--spacing-xl);
+  }
+
+  .no-products-icon {
+    font-size: 60px;
+  }
+
+  .no-products h3 {
+    font-size: var(--font-lg);
+  }
+
+  .no-products p {
+    font-size: var(--font-sm);
+  }
+
+  .reset-link {
+    font-size: var(--font-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
   }
 }
 
+/* Адаптивность для маленьких мобильных */
 @media (max-width: 480px) {
+  .catalog-hero {
+    padding: var(--spacing-lg) 0 var(--spacing-md);
+  }
+
   .catalog-hero-title {
-    font-size: clamp(24px, 5vw, 32px);
+    font-size: clamp(24px, 7vw, 32px);
+  }
+
+  .catalog-hero-subtitle {
+    font-size: 14px;
+  }
+
+  .catalog-container {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .product-card {
+    border-radius: 14px;
+  }
+
+  .product-image-wrapper {
+    aspect-ratio: 4/3;
   }
 
   .product-info {
@@ -663,11 +802,63 @@ const resetFilters = () => {
   }
 
   .product-name {
-    font-size: var(--font-base);
+    font-size: 16px;
   }
 
   .product-price {
-    font-size: var(--font-xl);
+    font-size: var(--font-lg);
+  }
+
+  .product-add-btn {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .filter-categories {
+    gap: var(--spacing-sm);
+  }
+
+  .category-btn {
+    font-size: 12px;
+    padding: 8px 14px;
+  }
+
+  .sort-select {
+    min-width: 120px;
+  }
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+  }
+
+  .no-products-icon {
+    font-size: 50px;
+  }
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 360px) {
+  .catalog-hero-title {
+    font-size: clamp(22px, 8vw, 28px);
+  }
+
+  .category-btn {
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+
+  .product-name {
+    font-size: 14px;
+  }
+
+  .product-add-btn {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+
+  .products-grid {
+    gap: var(--spacing-sm);
   }
 }
 </style>

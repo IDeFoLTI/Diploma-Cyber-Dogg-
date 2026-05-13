@@ -65,16 +65,6 @@
   line-height: 1.2;
 }
 
-.sale-title::after {
-  content: "";
-  display: block;
-  width: clamp(60px, 10vw, 100px);
-  height: 3px;
-  background: var(--c-accent);
-  margin: 20px auto 0;
-  border-radius: 2px;
-}
-
 .sale-blocks {
   display: flex;
   justify-content: center;
@@ -235,10 +225,6 @@
   .sale-title {
     font-size: clamp(20px, 5vw, 22px);
     margin-bottom: var(--spacing-sm);
-  }
-
-  .sale-title::after {
-    margin: 15px auto 0;
   }
 
   .sale-blocks {

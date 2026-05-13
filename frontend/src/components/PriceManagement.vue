@@ -597,25 +597,22 @@ onMounted(() => {
 
 .add-zone-btn {
   padding: 12px 24px;
-  background: linear-gradient(135deg, rgba(0, 140, 209, 0.3), rgba(0, 180, 230, 0.2));
-  border: 2px solid rgba(0, 140, 209, 0.5);
+  background: transparent;
+  border: 2px solid rgba(0, 140, 209, 0.4);
   color: var(--c-accent);
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: var(--font-sm);
   font-family: "Bowler", sans-serif;
   text-transform: uppercase;
   transition: all 0.3s ease;
   letter-spacing: 0.05em;
-  box-shadow: 0 4px 15px rgba(0, 140, 209, 0.2);
 }
 
 .add-zone-btn:hover {
-  background: linear-gradient(135deg, var(--c-accent), rgba(0, 180, 230, 0.9));
+  background: var(--c-accent);
   border-color: var(--c-accent);
   color: var(--c-white);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 140, 209, 0.4);
 }
 
 .loading, .empty {
@@ -681,23 +678,29 @@ onMounted(() => {
 .zone-actions {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  width: 100%;
   margin-top: auto;
 }
 
 .edit-zone-btn, .delete-zone-btn {
-  padding: 6px 12px;
-  font-size: 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: "Roboto", sans-serif;
-  transition: all 0.3s ease;
+  width: 100%;
   text-align: center;
+  padding: 10px 14px;
+  border: 2px solid;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: "Bowler", sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+  background: transparent;
 }
 
 .edit-zone-btn {
-  background: rgba(0, 140, 209, 0.2);
-  border: 1px solid rgba(0, 140, 209, 0.4);
+  border-color: rgba(0, 140, 209, 0.5);
   color: var(--c-accent);
 }
 
@@ -707,13 +710,12 @@ onMounted(() => {
 }
 
 .delete-zone-btn {
-  background: rgba(225, 30, 36, 0.2);
-  border: 1px solid rgba(225, 30, 36, 0.4);
-  color: var(--c-danger);
+  border-color: rgba(225, 30, 36, 0.5);
+  color: #f87171;
 }
 
 .delete-zone-btn:hover {
-  background: var(--c-danger);
+  background: rgba(220, 53, 69, 0.9);
   color: var(--c-white);
 }
 
@@ -743,16 +745,17 @@ onMounted(() => {
 }
 
 .add-price-btn {
-  padding: 10px 20px;
-  background: rgba(0, 140, 209, 0.2);
+  padding: 12px 24px;
+  background: transparent;
   border: 2px solid rgba(0, 140, 209, 0.4);
   color: var(--c-accent);
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: var(--font-sm);
   font-family: "Bowler", sans-serif;
   text-transform: uppercase;
   transition: all 0.3s ease;
+  letter-spacing: 0.05em;
 }
 
 .add-price-btn:hover {
@@ -836,164 +839,164 @@ onMounted(() => {
 }
 
 .delete-price-btn {
-  padding: 4px 8px;
-  background: rgba(225, 30, 36, 0.2);
-  border: 1px solid rgba(225, 30, 36, 0.4);
-  color: var(--c-danger);
-  border-radius: 4px;
+  padding: 8px 14px;
+  background: transparent;
+  border: 2px solid rgba(225, 30, 36, 0.5);
+  color: #f87171;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 12px;
+  font-family: "Bowler", sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   transition: all 0.3s ease;
 }
 
 .delete-price-btn:hover {
-  background: var(--c-danger);
+  background: rgba(220, 53, 69, 0.9);
   color: var(--c-white);
+  border-color: rgba(220, 53, 69, 0.9);
 }
 
 /* Модалки */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: var(--spacing-md);
+  align-items: center;
+  z-index: 50;
+  padding: 20px;
 }
-
 .modal {
-  background: var(--c-bg);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: var(--spacing-xl);
-  max-width: 500px;
-  width: 100%;
-  text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
 }
-
+.modal::-webkit-scrollbar {
+  width: 6px;
+}
+.modal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
 .modal h3 {
   font-family: "Bowler", sans-serif;
   font-size: var(--font-xl);
+  font-weight: 400;
   color: var(--c-white);
-  margin-bottom: var(--spacing-lg);
+  margin: 0 0 24px 0;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
-
 .modal-form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: 20px;
 }
-
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
   text-align: left;
 }
-
 .form-group label {
   font-family: "Bowler", sans-serif;
   font-size: var(--font-sm);
-  color: var(--c-white);
+  color: var(--c-white-70);
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
-
 .form-group input,
 .form-group select {
+  width: 100%;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
   color: var(--c-white);
   font-family: "Roboto", sans-serif;
   font-size: var(--font-md);
   transition: all 0.3s ease;
+  box-sizing: border-box;
 }
-
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
   border-color: var(--c-accent);
-  background: rgba(0, 140, 209, 0.15);
-  box-shadow: 0 0 15px rgba(0, 140, 209, 0.2);
+  background: rgba(0, 140, 209, 0.08);
+  box-shadow: 0 0 15px rgba(0, 140, 209, 0.15);
 }
-
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
 .form-group select option {
   background: var(--c-bg);
   color: var(--c-white);
 }
-
 .modal-buttons {
   display: flex;
-  gap: var(--spacing-sm);
-  justify-content: center;
-  margin-top: var(--spacing-md);
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
 }
-
-.modal-cancel {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  color: var(--c-white);
+.modal-cancel,
+.modal-confirm {
+  padding: 12px 24px;
+  border: 2px solid;
+  cursor: pointer;
+  border-radius: 12px;
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
 }
-
-.modal-cancel:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.modal-cancel {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  color: var(--c-white);
-}
-
-.modal-cancel:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
 .modal-confirm {
   background: transparent;
-  border: 2px solid var(--c-accent);
+  border-color: var(--c-accent);
   color: var(--c-accent);
 }
-
 .modal-confirm:hover {
   background: var(--c-accent);
   color: var(--c-white);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 140, 209, 0.3);
 }
-
-.modal-confirm.delete {
-  border-color: var(--c-danger);
-  color: var(--c-danger);
+.modal-cancel {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--c-white-60);
 }
-
-.modal-confirm.delete:hover {
-  background: var(--c-danger);
+.modal-cancel:hover {
+  border-color: var(--c-white-40);
   color: var(--c-white);
+  background: rgba(255, 255, 255, 0.05);
 }
-
 .modal-error {
   color: var(--c-danger);
-  padding: var(--spacing-sm);
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-sm);
+  text-align: center;
+  padding: 10px;
   background: rgba(225, 30, 36, 0.1);
-  border-radius: 8px;
-  font-family: "Roboto", sans-serif;
-  font-size: var(--font-sm);
+  border-radius: 10px;
 }
-
 .modal-success {
-  color: #4caf50;
-  padding: var(--spacing-sm);
-  background: rgba(76, 175, 80, 0.1);
-  border-radius: 8px;
+  color: #34d399;
   font-family: "Roboto", sans-serif;
   font-size: var(--font-sm);
+  text-align: center;
+  padding: 10px;
+  background: rgba(52, 211, 153, 0.1);
+  border-radius: 10px;
 }
 
 @media (max-width: 1024px) {
@@ -1034,11 +1037,6 @@ onMounted(() => {
     padding: var(--spacing-sm);
   }
 
-  .zone-actions {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-
   .details-header {
     flex-direction: column;
     gap: var(--spacing-md);
@@ -1056,6 +1054,20 @@ onMounted(() => {
   .price-input {
     width: 60px;
     padding: 4px 6px;
+  }
+
+  .modal {
+    padding: 24px 20px;
+  }
+
+  .modal-buttons {
+    flex-direction: column;
+  }
+
+  .modal-cancel,
+  .modal-confirm {
+    width: 100%;
+    text-align: center;
   }
 }
 </style>

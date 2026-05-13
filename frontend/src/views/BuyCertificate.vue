@@ -194,7 +194,7 @@ onMounted(() => {
 });
 
 function goBack() {
-  router.push('/gift-certificates');
+  router.push('/catalog');
 }
 
 async function submitOrder() {
