@@ -58,16 +58,6 @@ const certificates = [
   overflow: hidden;
 }
 
-.gift-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 140, 209, 0.3), transparent);
-}
-
 .gift-container {
   width: 100%;
   max-width: 1400px;

@@ -121,6 +121,10 @@
                   <span class="order-date">{{ formatDate(order.created_at) }}</span>
                   <span class="order-total">Итого: {{ order.total_price }} ₽</span>
                 </div>
+                <div v-if="order.certificatePromoCode" class="promo-code-row">
+                  <span class="promo-code-label">Код сертификата:</span>
+                  <span class="promo-code-value">{{ order.certificatePromoCode }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -185,6 +189,50 @@ onMounted(() => {
   }
 });
 
+function normalizeCertificateOrder(order) {
+  const hallNames = {
+    standart: 'Common Room',
+    battle: 'Battle Arena',
+    vip: 'VIP Room',
+    playstation: 'PlayStation',
+  };
+
+  const typeLabel = hallNames[order.hall] || 'Сертификат';
+  const details = [];
+
+  if (order.time_type) {
+    details.push(order.time_type === 'night' ? 'Ночное' : 'Дневное');
+  }
+  if (order.hours) {
+    details.push(order.hours.replace(/hours$/, 'ч')); 
+  }
+  if (order.package_type) {
+    details.push(order.package_type);
+  }
+
+  return {
+    id: `cert-${order.id}`,
+    created_at: order.created_at,
+    status: order.status,
+    total_price: order.price,
+    certificatePromoCode: order.promo_code,
+    certificateInfo: {
+      title: `${typeLabel} ${details.length ? `(${details.join(', ')})` : ''}`.trim(),
+      hall: typeLabel,
+      packageType: order.package_type,
+      timeType: order.time_type,
+      hours: order.hours,
+    },
+    items: [
+      {
+        name: `${typeLabel} сертификат${details.length ? ` — ${details.join(', ')}` : ''}`,
+        quantity: 1,
+        price: order.price,
+      }
+    ]
+  };
+}
+
 async function loadGameTimeBalance() {
   if (!user.value) return;
   
@@ -226,12 +274,32 @@ async function loadOrders() {
   loadingOrders.value = true;
   ordersError.value = '';
   try {
-    const response = await fetch(`${API_URL}/api/orders/my`, {
-      headers: { 'X-User': encodeURIComponent(JSON.stringify(user.value)) }
+    const [ordersResponse, certificatesResponse] = await Promise.all([
+      fetch(`${API_URL}/api/orders/my`, {
+        headers: { 'X-User': encodeURIComponent(JSON.stringify(user.value)) }
+      }),
+      fetch(`${API_URL}/api/certificates/my`, {
+        headers: { 'X-User': encodeURIComponent(JSON.stringify(user.value)) }
+      })
+    ]);
+
+    if (!ordersResponse.ok) {
+      throw new Error('Не удалось загрузить заказы');
+    }
+    if (!certificatesResponse.ok) {
+      throw new Error('Не удалось загрузить сертификаты');
+    }
+
+    const [ordersData, certificatesData] = await Promise.all([
+      ordersResponse.json(),
+      certificatesResponse.json()
+    ]);
+
+    const normalOrders = ordersData.orders || [];
+    const certificateOrders = (certificatesData.orders || []).map(normalizeCertificateOrder);
+    orders.value = [...normalOrders, ...certificateOrders].sort((a, b) => {
+      return new Date(b.created_at) - new Date(a.created_at);
     });
-    if (!response.ok) throw new Error('Не удалось загрузить заказы');
-    const data = await response.json();
-    orders.value = data.orders || [];
   } catch (err) {
     ordersError.value = err.message;
   } finally {
@@ -257,6 +325,7 @@ function formatOrderStatus(status) {
     paid: 'Оплачен',
     ready: 'Готов к выдаче',
     completed: 'Выдан',
+    used: 'Использован',
     cancelled: 'Отменён'
   };
   return map[status] || status;
@@ -686,6 +755,27 @@ const goToResetPassword = () => {
   align-items: center;
   padding-top: var(--spacing-sm);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.promo-code-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.promo-code-label {
+  color: var(--c-white-80);
+  font-size: var(--font-sm);
+}
+
+.promo-code-value {
+  color: var(--c-accent);
+  font-weight: 600;
 }
 
 .order-date {
