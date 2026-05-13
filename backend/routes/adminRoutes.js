@@ -37,7 +37,7 @@ export async function adminRoutes(app) {
         });
       }
 
-      // Найти пользователя по телефону
+      // Проверить, существует ли пользователь с таким телефоном
       const [users] = await db.query(
         "SELECT id FROM users WHERE phone = ?",
         [phone]
@@ -50,22 +50,24 @@ export async function adminRoutes(app) {
         });
       }
 
-      const userId = users[0].id;
-
-      // Определить zone_id и hours_type на основе hall
-      let zoneId, hoursType;
-      if (hall.includes('common_room')) {
-        zoneId = 1;
-        hoursType = hall.includes('day') ? 'day' : 'night';
-      } else if (hall.includes('battle_arena')) {
-        zoneId = 2;
-        hoursType = hall.includes('day') ? 'day' : 'night';
-      } else if (hall.includes('vip_room')) {
-        zoneId = 3;
-        hoursType = hall.includes('day') ? 'day' : 'night';
-      } else if (hall.includes('playstation')) {
-        zoneId = 4;
-        hoursType = hall.includes('_5') ? 'under_5' : 'under_7';
+      // Преобразовать hall в соответствующее имя столбца в user_game_time
+      let columnName;
+      if (hall === 'common_room_day') {
+        columnName = 'common_room_day';
+      } else if (hall === 'common_room_night') {
+        columnName = 'common_room_night';
+      } else if (hall === 'battle_arena_day') {
+        columnName = 'battle_arena_day';
+      } else if (hall === 'battle_arena_night') {
+        columnName = 'battle_arena_night';
+      } else if (hall === 'vip_room_day') {
+        columnName = 'vip_room_day';
+      } else if (hall === 'vip_room_night') {
+        columnName = 'vip_room_night';
+      } else if (hall === 'playstation_under_5') {
+        columnName = 'playstation_under_5';
+      } else if (hall === 'playstation_under_7') {
+        columnName = 'playstation_under_7';
       } else {
         return reply.status(400).send({
           error: "VALIDATION_ERROR",
@@ -73,16 +75,31 @@ export async function adminRoutes(app) {
         });
       }
 
-      // Добавить время
+      // Проверить или создать запись в user_game_time для этого телефона
+      const [existing] = await db.query(
+        "SELECT id FROM user_game_time WHERE phone = ?",
+        [phone]
+      );
+
+      if (existing.length === 0) {
+        // Создать новую запись
+        await db.query(
+          "INSERT INTO user_game_time (phone) VALUES (?)",
+          [phone]
+        );
+      }
+
+      // Добавить часы к существующему значению
       await db.query(
-        "INSERT INTO user_time (user_id, zone_id, hours_type, hours) VALUES (?, ?, ?, ?)",
-        [userId, zoneId, hoursType, hours]
+        `UPDATE user_game_time SET ${columnName} = ${columnName} + ? WHERE phone = ?`,
+        [hours, phone]
       );
 
       return reply.status(200).send({
         message: "Время добавлено",
-        userId,
+        phone,
         hours,
+        hall,
       });
     } catch (err) {
       request.log.error("Add game time error:", err);

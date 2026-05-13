@@ -36,7 +36,7 @@
     <div v-if="selectedCategory" class="category-details">
       <div class="details-header">
         <h3>{{ selectedCategory.name }}</h3>
-        <button class="add-item-btn" @click="showAddItemModal = true">
+        <button class="add-item-btn" @click="openAddItemModal">
           + Добавить товар
         </button>
       </div>
@@ -355,6 +355,23 @@ async function deleteCategory(categoryId) {
   }
 }
 
+function openAddItemModal() {
+  editingItem.value = null;
+  itemError.value = '';
+  itemSuccess.value = '';
+  itemForm.value = {
+    id: null,
+    categoryId: selectedCategory.value.id,
+    name: '',
+    description: '',
+    weight: '',
+    price: '',
+    popular: false,
+    vegetarian: false
+  };
+  showItemModal.value = true;
+}
+
 function editItem(item) {
   editingItem.value = item;
   itemForm.value = {
@@ -406,7 +423,11 @@ async function saveItem() {
       })
     });
 
-    if (!response.ok) throw new Error('Не удалось сохранить товар');
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Не удалось сохранить товар');
+    }
 
     itemSuccess.value = itemForm.value.id ? 'Товар обновлен!' : 'Товар добавлен!';
     

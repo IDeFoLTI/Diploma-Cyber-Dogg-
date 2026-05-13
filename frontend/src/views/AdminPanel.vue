@@ -505,11 +505,12 @@ async function addTimeToUser() {
       })
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      throw new Error('Не удалось добавить время');
+      throw new Error(data.message || 'Не удалось добавить время');
     }
 
-    const data = await response.json();
     addTimeSuccess.value = `Время добавлено!`;
     
     // Сброс формы через 2 секунды
