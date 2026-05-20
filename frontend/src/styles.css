@@ -64,7 +64,12 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
-  scroll-padding-top: 80px;
+  scroll-padding-top: 100px;
+}
+
+/* Высота шапки для адаптивных отступов */
+:root {
+  --header-height: clamp(70px, 10vh, 100px);
 }
 
 body {

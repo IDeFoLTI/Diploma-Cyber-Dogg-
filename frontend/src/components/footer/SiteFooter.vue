@@ -21,6 +21,8 @@
         <router-link to="/" class="footer-link">Главная</router-link>
         <router-link to="/menu" class="footer-link">Меню</router-link>
         <router-link to="/price" class="footer-link">Цены</router-link>
+        <router-link to="/gift-certificates" class="footer-link">Сертификаты</router-link>
+        <router-link to="/catalog" class="footer-link">Каталог</router-link>
       </nav>
 
       <div class="contacts">
@@ -64,7 +66,11 @@ const vkUrl = '/icons/vk.svg';
   grid-template-columns: minmax(240px, 1.1fr) minmax(220px, 1fr) minmax(260px, 1.2fr);
   grid-template-areas: "left nav contacts";
   align-items: start;
+  justify-items: center;
   gap: var(--spacing-md);
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
 }
 
 .left {
@@ -72,6 +78,13 @@ const vkUrl = '/icons/vk.svg';
   gap: var(--spacing-sm);
   align-self: end;
   grid-area: left;
+  justify-items: start;
+}
+
+@media (max-width: 900px) {
+  .left {
+    justify-items: center;
+  }
 }
 
 .social {
@@ -177,11 +190,14 @@ const vkUrl = '/icons/vk.svg';
     align-items: center;
     text-align: center;
     gap: var(--spacing-md);
-    padding: 0 var(--spacing-sm);
+    padding: 0 var(--spacing-md);
   }
 
   .left {
-    display: contents;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
   }
 
   .footer-nav {
@@ -191,7 +207,6 @@ const vkUrl = '/icons/vk.svg';
   .contacts {
     order: 3;
     text-align: center;
-    justify-self: center;
   }
 
   .social {
@@ -214,38 +229,32 @@ const vkUrl = '/icons/vk.svg';
 /* Адаптивность для мобильных */
 @media (max-width: 600px) {
   .inner {
-    padding: 0 var(--spacing-xs);
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    gap: var(--spacing-sm);
+    padding: 0 var(--spacing-sm);
+    gap: var(--spacing-md);
   }
 
   .footer-nav {
     gap: var(--spacing-sm);
     font-size: 0.85rem;
-    width: 100%;
+    width: auto;
     justify-content: center;
   }
 
   .logo {
     max-width: 150px;
-    margin: 0 auto;
   }
 
   .contacts {
     font-size: 0.85rem;
-    width: 100%;
-    max-width: 280px;
   }
 
   .social {
     justify-content: center;
-    width: 100%;
+    width: auto;
   }
 
   .copyright {
-    width: 100%;
+    width: auto;
   }
 }
 

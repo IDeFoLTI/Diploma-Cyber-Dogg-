@@ -1,4 +1,33 @@
 /**
+ * Middleware для проверки авторизации пользователя
+ */
+export async function authenticateUser(request, reply) {
+  const userStr = request.headers["x-user"];
+  if (!userStr) {
+    return reply.status(401).send({
+      error: "UNAUTHORIZED",
+      message: "Требуется авторизация",
+    });
+  }
+
+  try {
+    const user = JSON.parse(decodeURIComponent(userStr));
+    if (!user.id || !user.phone) {
+      return reply.status(401).send({
+        error: "UNAUTHORIZED",
+        message: "Неверный формат токена",
+      });
+    }
+    request.user = user;
+  } catch (err) {
+    return reply.status(401).send({
+      error: "UNAUTHORIZED",
+      message: "Неверный формат токена",
+    });
+  }
+}
+
+/**
  * Middleware для проверки админа
  */
 export async function authenticateAdmin(request, reply) {

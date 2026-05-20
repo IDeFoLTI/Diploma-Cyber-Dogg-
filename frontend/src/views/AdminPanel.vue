@@ -69,18 +69,28 @@
 
       <!-- Секция пользователей -->
       <div v-if="activeTab === 'users'" class="admin-section">
-        <h2>Все пользователи</h2>
+        <div class="section-header">
+          <h2>Все пользователи</h2>
+          <div class="search-box">
+            <input
+              v-model="searchPhone"
+              type="text"
+              placeholder="Поиск по телефону..."
+              class="search-input"
+            />
+          </div>
+        </div>
         
         <div v-if="loading" class="loading">Загрузка...</div>
         
         <div v-else-if="error" class="error">{{ error }}</div>
         
-        <div v-else-if="users.length === 0" class="empty">
-          Нет пользователей
+        <div v-else-if="filteredUsers.length === 0" class="empty">
+          {{ searchPhone ? 'Пользователи не найдены' : 'Нет пользователей' }}
         </div>
         
         <div v-else class="users-list">
-          <div v-for="user in users" :key="user.id" class="user-card">
+          <div v-for="user in filteredUsers" :key="user.id" class="user-card">
             <div class="user-info">
               <div class="field">
                 <span class="label">ID:</span>
@@ -355,7 +365,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import SiteHeader from '../components/header/SiteHeader.vue';
 import SiteFooter from '../components/footer/SiteFooter.vue';
@@ -372,6 +382,18 @@ const certificates = ref([]);
 const orders = ref([]);
 const loading = ref(false);
 const error = ref('');
+const searchPhone = ref('');
+
+// Вычисляемый список пользователей с фильтром по телефону
+const filteredUsers = computed(() => {
+  if (!searchPhone.value.trim()) {
+    return users.value;
+  }
+  const query = searchPhone.value.toLowerCase().trim();
+  return users.value.filter(user => 
+    (user.phone && user.phone.toLowerCase().includes(query))
+  );
+});
 
 // Модалки
 const showAddTimeModal = ref(false);
@@ -851,7 +873,7 @@ function formatHallShort(hall) {
 .admin-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 160px var(--spacing-md) var(--spacing-xl);
+  padding: calc(var(--header-height) + var(--spacing-xl)) var(--spacing-md) var(--spacing-xl);
   width: 100%;
 }
 
@@ -993,13 +1015,49 @@ h1 {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.admin-section h2 {
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.section-header h2 {
   font-family: "Bowler", sans-serif;
   font-size: var(--font-xl);
   color: var(--c-white);
-  margin-bottom: var(--spacing-lg);
+  margin: 0;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+.search-box {
+  flex-shrink: 0;
+}
+
+.search-input {
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  color: var(--c-white);
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-md);
+  width: 220px;
+  transition: all 0.3s ease;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--c-accent);
+  background: rgba(0, 140, 209, 0.08);
+  box-shadow: 0 0 15px rgba(0, 140, 209, 0.15);
 }
 
 .loading, .empty {
@@ -1131,47 +1189,50 @@ select option {
 /* Модалки */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: var(--spacing-md);
+  padding: 20px;
 }
 
 .modal {
-  background: var(--c-bg);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: var(--spacing-xl);
-  max-width: 600px;
-  width: 100%;
-  text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
+}
+
+.modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
 }
 
 .modal h3 {
   font-family: "Bowler", sans-serif;
   font-size: var(--font-xl);
+  font-weight: 400;
   color: var(--c-white);
-  margin-bottom: var(--spacing-lg);
+  margin: 0 0 24px 0;
   text-transform: uppercase;
-}
-
-.modal-desc {
-  color: rgba(255, 255, 255, 0.5);
-  font-family: "Roboto", sans-serif;
-  margin-bottom: var(--spacing-lg);
+  letter-spacing: 0.05em;
 }
 
 .modal-form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: 20px;
 }
 
 .form-group {
@@ -1183,73 +1244,97 @@ select option {
 .form-group label {
   font-family: "Bowler", sans-serif;
   font-size: var(--font-sm);
-  color: var(--c-white);
+  color: var(--c-white-70);
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.form-group input {
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
   color: var(--c-white);
   font-family: "Roboto", sans-serif;
   font-size: var(--font-md);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: var(--c-accent);
+  background: rgba(0, 140, 209, 0.08);
+  box-shadow: 0 0 15px rgba(0, 140, 209, 0.15);
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.form-group select option {
+  background: var(--c-bg);
+  color: var(--c-white);
 }
 
 .modal-buttons {
   display: flex;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-md);
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.modal-cancel,
+.modal-confirm {
+  padding: 12px 24px;
+  border: 2px solid;
+  cursor: pointer;
+  border-radius: 12px;
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
 }
 
 .modal-confirm {
-  flex: 1;
-  padding: 12px;
-  background: var(--c-accent);
-  border: none;
-  color: var(--c-white);
-  cursor: pointer;
-  border-radius: 8px;
-  font-size: var(--font-md);
-  font-family: "Bowler", sans-serif;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
+  background: transparent;
+  border-color: var(--c-accent);
+  color: var(--c-accent);
 }
 
 .modal-confirm:hover {
-  background: rgba(0, 140, 209, 0.8);
-}
-
-.modal-confirm.delete {
-  background: var(--c-danger);
-}
-
-.modal-confirm.delete:hover {
-  background: rgba(225, 30, 36, 0.8);
+  background: var(--c-accent);
+  color: var(--c-white);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 140, 209, 0.3);
 }
 
 .modal-cancel {
-  flex: 1;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  color: var(--c-white);
-  cursor: pointer;
-  border-radius: 8px;
-  font-size: var(--font-md);
-  font-family: "Bowler", sans-serif;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--c-white-60);
 }
 
 .modal-cancel:hover {
-  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--c-white-40);
+  color: var(--c-white);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modal-confirm.delete {
+  border-color: var(--c-danger);
+  color: var(--c-danger);
+}
+
+.modal-confirm.delete:hover {
+  background: var(--c-danger);
+  color: var(--c-white);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(225, 30, 36, 0.3);
 }
 
 .modal-error {
@@ -1257,33 +1342,19 @@ select option {
   font-family: "Roboto", sans-serif;
   font-size: var(--font-sm);
   text-align: center;
-  margin-top: var(--spacing-sm);
+  padding: 10px;
+  background: rgba(225, 30, 36, 0.1);
+  border-radius: 10px;
 }
 
 .modal-success {
-  color: #2ecc71;
+  color: #34d399;
   font-family: "Roboto", sans-serif;
   font-size: var(--font-sm);
   text-align: center;
-  margin-top: var(--spacing-sm);
-}
-
-.modal-close {
-  padding: 12px 32px;
-  background: var(--c-accent);
-  border: none;
-  color: var(--c-white);
-  cursor: pointer;
-  border-radius: 8px;
-  font-size: var(--font-md);
-  font-family: "Bowler", sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: all 0.3s ease;
-}
-
-.modal-close:hover {
-  background: rgba(0, 140, 209, 0.8);
+  padding: 10px;
+  background: rgba(52, 211, 153, 0.1);
+  border-radius: 10px;
 }
 
 /* Таблица сертификатов */
@@ -1447,10 +1518,8 @@ select option {
 
 /* Адаптивность */
 @media (max-width: 768px) {
-  .header-row {
-    flex-direction: column;
-    gap: var(--spacing-md);
-    align-items: flex-start;
+  .admin-container {
+    padding: calc(var(--header-height) + var(--spacing-lg)) var(--spacing-md);
   }
 
   .logout-btn {
@@ -1478,20 +1547,38 @@ select option {
     gap: var(--spacing-md);
   }
 
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
   .modal {
-    padding: var(--spacing-lg);
+    padding: 24px 20px;
     max-width: 100%;
   }
 
   .modal h3 {
     font-size: var(--font-lg);
   }
+
+  .modal-buttons {
+    flex-direction: column;
+  }
+
+  .modal-cancel,
+  .modal-confirm {
+    width: 100%;
+    text-align: center;
+  }
 }
 
 @media (max-width: 480px) {
-  .admin-actions {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-sm);
+  .admin-container {
+    padding: calc(var(--header-height) + var(--spacing-md)) var(--spacing-sm);
   }
 
   .action-btn {
@@ -1505,21 +1592,12 @@ select option {
   }
 
   .modal {
-    padding: var(--spacing-md);
+    padding: 24px 20px;
   }
 
   .modal h3 {
     font-size: var(--font-md);
     margin-bottom: var(--spacing-md);
-  }
-
-  .modal-buttons {
-    flex-direction: column;
-  }
-
-  .modal-confirm,
-  .modal-cancel {
-    width: 100%;
   }
 }
 </style>

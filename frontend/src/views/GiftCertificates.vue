@@ -35,6 +35,14 @@ const certificateTypes = [
 ];
 
 const handleCertificateSubmit = (data) => {
+  // Проверка авторизации
+  const userStr = localStorage.getItem('user');
+  if (!userStr) {
+    alert('Для покупки сертификата необходимо авторизоваться');
+    router.push('/login');
+    return;
+  }
+  
   // Переход на страницу покупки с предзаполненными данными
   router.push({
     path: '/buy-certificate',
@@ -64,7 +72,7 @@ const handleCertificateSubmit = (data) => {
   width: 100%;
   max-width: 1300px;
   margin: 0 auto;
-  padding: 160px var(--spacing-md) var(--spacing-xl);
+  padding: calc(var(--header-height) + var(--spacing-xl)) var(--spacing-md) var(--spacing-xl);
 }
 
 .gift-title {
@@ -86,6 +94,18 @@ const handleCertificateSubmit = (data) => {
 
 .cert-block {
   margin-bottom: var(--spacing-3xl);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: calc(var(--header-height) + var(--spacing-lg)) var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: calc(var(--header-height) + var(--spacing-md)) var(--spacing-sm);
+  }
 }
 </style>
 

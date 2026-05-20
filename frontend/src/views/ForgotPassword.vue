@@ -3,7 +3,7 @@
     <div class="auth-wrapper">
       <div class="auth-card">
         <img class="auth-logo" :src="logoUrl" alt="Cyber Dogg" />
-        <h1 class="auth-title">Восстановление пароля</h1>
+        <h1 class="auth-title">Восстановление доступа</h1>
         
         <form class="auth-form" @submit.prevent="handleSubmit">
           <div class="form-row" :class="{ 'has-error': errors.email }">
@@ -93,16 +93,68 @@ const validateForm = () => {
   return isValid;
 };
 
-const handleSubmit = () => {
-  if (validateForm()) {
-    console.log('Восстановление:', formData);
-    router.push('/reset-password');
+const handleSubmit = async () => {
+  if (!validateForm()) return;
+
+  try {
+    const response = await fetch('http://localhost:3000/api/auth/send-reset-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: formData.email })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Ошибка отправки кода');
+    }
+
+    console.log('Код отправлен:', data);
+    
+    // Сохраняем email в localStorage для использования на следующей странице
+    localStorage.setItem('resetEmail', formData.email);
+    
+    // Перенаправляем на страницу ввода нового пароля
+    router.push({
+      path: '/reset-password',
+      query: { email: formData.email }
+    });
+  } catch (error) {
+    errors.email = error.message || 'Не удалось отправить код. Попробуйте снова.';
+    console.error('Ошибка отправки кода:', error);
   }
 };
 
-const sendCode = () => {
-  if (formData.email.trim()) {
-    console.log('Отправка кода на почту:', formData.email);
+const sendCode = async () => {
+  if (!formData.email.trim()) {
+    errors.email = 'Введите email для отправки кода';
+    return;
+  }
+  
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    errors.email = 'Введите корректный email';
+    return;
+  }
+
+  try {
+    const response = await fetch('http://localhost:3000/api/auth/send-reset-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: formData.email })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Ошибка отправки кода');
+    }
+
+    console.log('Код отправлен:', data);
+    errors.email = '';
+    alert(`Код отправлен на ${formData.email}. Проверьте почту (для тестирования код выведен в консоль).`);
+  } catch (error) {
+    errors.email = error.message || 'Не удалось отправить код. Попробуйте снова.';
+    console.error('Ошибка отправки кода:', error);
   }
 };
 

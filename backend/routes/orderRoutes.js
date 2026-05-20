@@ -1,4 +1,4 @@
-import { authenticateAdmin } from "../middleware/auth.js";
+import { authenticateAdmin, authenticateUser } from "../middleware/auth.js";
 import {
   createOrder,
   getAllOrders,
@@ -9,8 +9,10 @@ import {
 } from "../models/Order.js";
 
 export async function orderRoutes(app) {
-  // Создать заказ (публичный)
-  app.post("/api/orders", async (request, reply) => {
+  // Создать заказ (требуется авторизация)
+  app.post("/api/orders", {
+    preHandler: authenticateUser,
+  }, async (request, reply) => {
     try {
       const { phone, items, total_price } = request.body;
 

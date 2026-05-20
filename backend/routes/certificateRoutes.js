@@ -2,11 +2,13 @@
  * Роуты для сертификатов
  */
 import { generateUniquePromoCode } from "../utils/promoCodeGenerator.js";
-import { authenticateAdmin } from "../middleware/auth.js";
+import { authenticateAdmin, authenticateUser } from "../middleware/auth.js";
 
 export async function certificateRoutes(app) {
-  // Создать заказ на сертификат
-  app.post("/api/certificates/order", async (request, reply) => {
+  // Создать заказ на сертификат (требуется авторизация)
+  app.post("/api/certificates/order", {
+    preHandler: authenticateUser,
+  }, async (request, reply) => {
     try {
       const {
         hall,

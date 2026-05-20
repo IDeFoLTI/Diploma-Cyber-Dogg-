@@ -155,6 +155,15 @@ onMounted(async () => {
 
 const addToCart = () => {
   if (!product.value) return;
+  
+  // Проверка авторизации
+  const userStr = localStorage.getItem('user');
+  if (!userStr) {
+    alert('Для добавления товаров в корзину необходимо авторизоваться');
+    router.push('/login');
+    return;
+  }
+  
   addProduct(product.value);
   addedToCart.value = true;
   setTimeout(() => (addedToCart.value = false), 2000);
@@ -190,7 +199,7 @@ const stockStatus = computed(() => getStockStatus());
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 120px 24px 60px;
+  padding: calc(var(--header-height) + 80px) 24px 60px;
 }
 
 /* Хлебные крошки */
@@ -535,7 +544,7 @@ const stockStatus = computed(() => getStockStatus());
 
 @media (max-width: 600px) {
   .product-container {
-    padding: 100px 16px 48px;
+    padding: calc(var(--header-height) + 40px) 16px 48px;
   }
 
   .product-main-block,

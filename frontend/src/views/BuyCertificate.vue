@@ -198,6 +198,18 @@ function goBack() {
 }
 
 async function submitOrder() {
+  // Проверка авторизации
+  const userStr = localStorage.getItem('user');
+  if (!userStr) {
+    errorMessage.value = 'Для покупки сертификата необходимо авторизоваться';
+    setTimeout(() => {
+      router.push('/login');
+    }, 2000);
+    return;
+  }
+    
+  const user = JSON.parse(userStr);
+  
   submitting.value = true;
   successMessage.value = '';
   errorMessage.value = '';
@@ -217,7 +229,8 @@ async function submitOrder() {
     const response = await fetch(`${API_URL}/api/certificates/order`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'x-user': encodeURIComponent(JSON.stringify(user))
       },
       body: JSON.stringify(orderData)
     });
@@ -257,7 +270,7 @@ async function submitOrder() {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 160px var(--spacing-md) var(--spacing-xl);
+  padding: calc(var(--header-height) + var(--spacing-xl)) var(--spacing-md) var(--spacing-xl);
 }
 
 .buy-title {
@@ -493,6 +506,10 @@ async function submitOrder() {
   
   .cert-summary {
     position: static;
+  }
+  
+  .container {
+    padding: calc(var(--header-height) + var(--spacing-lg)) var(--spacing-md);
   }
 }
 </style>

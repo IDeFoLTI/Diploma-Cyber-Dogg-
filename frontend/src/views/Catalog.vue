@@ -107,11 +107,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import SiteHeader from '../components/header/SiteHeader.vue';
 import SiteFooter from '../components/footer/SiteFooter.vue';
 import { useCart } from '../composables/useCart.js';
 import { resolveImageUrl } from '../utils/imageUrl.js';
 
+const router = useRouter();
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const { addProduct } = useCart();
 
@@ -189,6 +191,15 @@ const resetFilters = () => {
 function handleAddToCart(product, event) {
   event.preventDefault();
   event.stopPropagation();
+  
+  // Проверка авторизации
+  const userStr = localStorage.getItem('user');
+  if (!userStr) {
+    alert('Для добавления товаров в корзину необходимо авторизоваться');
+    router.push('/login');
+    return;
+  }
+  
   addProduct(product);
 }
 </script>
@@ -207,6 +218,7 @@ function handleAddToCart(product, event) {
   padding: var(--spacing-3xl) 0 var(--spacing-xl);
   position: relative;
   overflow: hidden;
+  padding-top: calc(var(--header-height) + var(--spacing-xl));
 }
 
 .catalog-hero::before {
@@ -610,7 +622,7 @@ function handleAddToCart(product, event) {
 /* Адаптивность для планшетов */
 @media (max-width: 1024px) {
   .catalog-hero {
-    padding: var(--spacing-2xl) 0 var(--spacing-lg);
+    padding: calc(var(--header-height) + var(--spacing-2xl)) 0 var(--spacing-lg);
   }
 
   .catalog-hero-title {
@@ -642,7 +654,7 @@ function handleAddToCart(product, event) {
 /* Адаптивность для мобильных */
 @media (max-width: 768px) {
   .catalog-hero {
-    padding: var(--spacing-xl) 0 var(--spacing-md);
+    padding: calc(var(--header-height) + var(--spacing-xl)) 0 var(--spacing-md);
   }
 
   .catalog-hero-title {
@@ -769,7 +781,7 @@ function handleAddToCart(product, event) {
 /* Адаптивность для маленьких мобильных */
 @media (max-width: 480px) {
   .catalog-hero {
-    padding: var(--spacing-lg) 0 var(--spacing-md);
+    padding: calc(var(--header-height) + var(--spacing-lg)) 0 var(--spacing-md);
   }
 
   .catalog-hero-title {

@@ -349,7 +349,7 @@ const goToResetPassword = () => {
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  padding: 160px var(--spacing-md) var(--spacing-xl);
+  padding: calc(var(--header-height) + var(--spacing-xl)) var(--spacing-md) var(--spacing-xl);
 }
 
 .profile-card {
@@ -813,7 +813,7 @@ const goToResetPassword = () => {
 
 @media (max-width: 480px) {
   .container {
-    padding: var(--spacing-md) var(--spacing-sm);
+    padding: calc(var(--header-height) + var(--spacing-md)) var(--spacing-sm);
   }
 
   .profile-card {

@@ -169,7 +169,7 @@ onUnmounted(() => {
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 160px var(--spacing-lg) var(--spacing-xl);
+  padding: calc(var(--header-height) + var(--spacing-xl)) var(--spacing-lg) var(--spacing-xl);
 }
 
 .menu-title {
@@ -404,7 +404,7 @@ onUnmounted(() => {
 /* Адаптивность */
 @media (max-width: 1024px) {
   .container {
-    padding: var(--spacing-lg) var(--spacing-md);
+    padding: calc(var(--header-height) + var(--spacing-lg)) var(--spacing-md);
     max-width: 1400px;
   }
 
@@ -428,7 +428,7 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .container {
-    padding: var(--spacing-md);
+    padding: calc(var(--header-height) + var(--spacing-md)) var(--spacing-md);
   }
 
   .category-btn {
@@ -455,7 +455,7 @@ onUnmounted(() => {
 
 @media (max-width: 480px) {
   .container {
-    padding: var(--spacing-sm);
+    padding: calc(var(--header-height) + var(--spacing-sm)) var(--spacing-sm);
   }
 
   .menu-title {

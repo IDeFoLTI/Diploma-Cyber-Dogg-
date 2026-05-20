@@ -831,10 +831,348 @@ onMounted(() => {
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 50;
+  justify-content: center;
+  z-index: 1000;
   padding: 20px;
+}
+
+.modal {
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
+}
+
+.modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.modal-large {
+  width: min(720px, calc(100vw - 32px));
+}
+
+.modal h3 {
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-xl);
+  font-weight: 400;
+  color: var(--c-white);
+  margin: 0 0 24px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-sm);
+  color: var(--c-white-70);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  color: var(--c-white);
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-md);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.form-group select {
+  cursor: pointer;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--c-accent);
+  background: rgba(0, 140, 209, 0.08);
+  box-shadow: 0 0 15px rgba(0, 140, 209, 0.15);
+}
+
+.form-group select option {
+  background: var(--c-bg);
+  color: var(--c-white);
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.modal-cancel,
+.modal-confirm {
+  padding: 12px 24px;
+  border: 2px solid;
+  cursor: pointer;
+  border-radius: 12px;
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.modal-confirm {
+  background: transparent;
+  border-color: var(--c-accent);
+  color: var(--c-accent);
+}
+
+.modal-confirm:hover {
+  background: var(--c-accent);
+  color: var(--c-white);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 140, 209, 0.3);
+}
+
+.modal-cancel {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--c-white-60);
+}
+
+.modal-cancel:hover {
+  border-color: var(--c-white-40);
+  color: var(--c-white);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modal-confirm.delete {
+  border-color: var(--c-danger);
+  color: var(--c-danger);
+}
+
+.modal-confirm.delete:hover {
+  background: var(--c-danger);
+  color: var(--c-white);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(225, 30, 36, 0.3);
+}
+
+.modal-error {
+  color: var(--c-danger);
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-sm);
+  text-align: center;
+  padding: 10px;
+  background: rgba(225, 30, 36, 0.1);
+  border-radius: 10px;
+}
+
+.modal-success {
+  color: #34d399;
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-sm);
+  text-align: center;
+  padding: 10px;
+  background: rgba(52, 211, 153, 0.1);
+  border-radius: 10px;
+}
+
+.modal {
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: var(--c-bg);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
+}
+
+.modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.modal-large {
+  width: min(720px, calc(100vw - 32px));
+}
+
+.modal h3 {
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-xl);
+  color: var(--c-white);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-sm);
+  color: var(--c-white);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: var(--c-white);
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-md);
+  transition: all 0.3s ease;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.form-group select {
+  cursor: pointer;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--c-accent);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.modal-cancel,
+.modal-confirm {
+  padding: 12px 24px;
+  border: 2px solid;
+  border-radius: 10px;
+  font-family: "Bowler", sans-serif;
+  font-size: var(--font-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-confirm {
+  background: transparent;
+  border-color: var(--c-accent);
+  color: var(--c-accent);
+}
+
+.modal-confirm:hover {
+  background: var(--c-accent);
+  color: var(--c-white);
+  box-shadow: 0 8px 24px rgba(0, 140, 209, 0.3);
+}
+
+.modal-cancel {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--c-white-60);
+}
+
+.modal-cancel:hover {
+  border-color: var(--c-white-40);
+  color: var(--c-white);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modal-confirm.delete {
+  border-color: var(--c-danger);
+  color: var(--c-danger);
+}
+
+.modal-confirm.delete:hover {
+  background: var(--c-danger);
+  color: var(--c-white);
+}
+
+.modal-error {
+  color: var(--c-danger);
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-sm);
+  text-align: center;
+  margin-top: var(--spacing-sm);
+  padding: 12px;
+  background: rgba(231, 76, 60, 0.1);
+  border-radius: 10px;
+}
+
+.modal-success {
+  color: #34d399;
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-sm);
+  text-align: center;
+  margin-top: var(--spacing-sm);
+  padding: 12px;
+  background: rgba(52, 211, 153, 0.1);
+  border-radius: 10px;
 }
 .modal {
   width: min(640px, calc(100vw - 32px));

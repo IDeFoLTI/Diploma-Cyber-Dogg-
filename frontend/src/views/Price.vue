@@ -288,7 +288,7 @@ onMounted(() => {
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 160px var(--spacing-lg) var(--spacing-xl);
+  padding: calc(var(--header-height) + var(--spacing-xl)) var(--spacing-lg) var(--spacing-xl);
 }
 
 .price-title {
@@ -647,7 +647,7 @@ onMounted(() => {
 @media (max-width: 1024px) {
   .container {
     max-width: 100%;
-    padding: var(--spacing-xl) var(--spacing-md);
+    padding: calc(var(--header-height) + var(--spacing-xl)) var(--spacing-md);
   }
 
   .price-blocks {
@@ -675,7 +675,7 @@ onMounted(() => {
 /* Адаптивность для маленьких экранов */
 @media (max-width: 768px) {
   .container {
-    padding: var(--spacing-lg) var(--spacing-md);
+    padding: calc(var(--header-height) + var(--spacing-lg)) var(--spacing-md);
   }
 
   .price-title {
@@ -738,7 +738,7 @@ onMounted(() => {
 /* Адаптивность для мобильных */
 @media (max-width: 480px) {
   .container {
-    padding: var(--spacing-md) var(--spacing-sm);
+    padding: calc(var(--header-height) + var(--spacing-md)) var(--spacing-sm);
   }
 
   .price-block {

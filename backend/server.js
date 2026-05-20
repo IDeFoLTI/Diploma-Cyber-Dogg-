@@ -12,6 +12,7 @@ import { createMenuTables, createMenuItemsTable } from "./models/Menu.js";
 import { createPriceZonesTable, createZonePricesTable } from "./models/PriceZone.js";
 import { createProductsTable } from "./models/Product.js";
 import { createOrdersTable, createOrderItemsTable } from "./models/Order.js";
+import { createPasswordResetCodesTable } from "./models/PasswordResetCode.js";
 import { authRoutes, userRoutes } from "./routes/userRoutes.js";
 import { reservationRoutes } from "./routes/reservationRoutes.js";
 import { adminRoutes } from "./routes/adminRoutes.js";
@@ -107,6 +108,8 @@ const start = async () => {
     console.log("✅ Orders table initialized");
     await db.query(createOrderItemsTable);
     console.log("✅ Order items table initialized");
+    await db.query(createPasswordResetCodesTable);
+    console.log("✅ Password reset codes table initialized");
     console.log("✅ Database initialized");
     
     // Роуты
@@ -132,6 +135,26 @@ const start = async () => {
     console.log("🔄 Registering user routes...");
     userRoutes(app);
     console.log("✅ User routes registered");
+    
+    // Password reset routes
+    console.log("🔄 Registering password reset routes...");
+    app.post("/api/auth/send-reset-code", async (request, reply) => {
+      const { sendResetCodeHandler } = await import("./controllers/passwordResetController.js");
+      return sendResetCodeHandler(request, reply);
+    });
+    app.post("/api/auth/verify-reset-code", async (request, reply) => {
+      const { verifyResetCodeHandler } = await import("./controllers/passwordResetController.js");
+      return verifyResetCodeHandler(request, reply);
+    });
+    app.post("/api/auth/resend-reset-code", async (request, reply) => {
+      const { resendResetCodeHandler } = await import("./controllers/passwordResetController.js");
+      return resendResetCodeHandler(request, reply);
+    });
+    app.post("/api/auth/reset-password", async (request, reply) => {
+      const { resetPasswordHandler } = await import("./controllers/passwordResetController.js");
+      return resetPasswordHandler(request, reply);
+    });
+    console.log("✅ Password reset routes registered");
     
     // Подключаем роуты бронирования
     console.log("🔄 Registering reservation routes...");

@@ -56,6 +56,7 @@ import GamingAccessories from "../components/homepage/GamingAccessories.vue";
   display: flex;
   flex-direction: column;
   gap: clamp(26px, 3vw, 44px);
+  padding-top: var(--header-height);
 }
 
 .homepage-section {
@@ -82,10 +83,17 @@ import GamingAccessories from "../components/homepage/GamingAccessories.vue";
 @media (max-width: 900px) {
   .home-sections {
     gap: clamp(18px, 5vw, 32px);
+    padding-top: calc(var(--header-height) - 20px);
   }
 
   .homepage-section {
     padding: clamp(18px, 4vw, 32px) 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-sections {
+    padding-top: calc(var(--header-height) - 30px);
   }
 }
 </style>

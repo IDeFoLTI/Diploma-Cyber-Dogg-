@@ -96,6 +96,7 @@ import SiteFooter from '../components/footer/SiteFooter.vue';
 import { useCart } from '../composables/useCart.js';
 import { resolveImageUrl } from '../utils/imageUrl.js';
 
+const router = useRouter();
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const { items, totalCount, totalPrice, removeItem, updateQuantity, clearCart } = useCart();
 
@@ -146,6 +147,19 @@ function formatPlayers(val) {
 
 async function submitOrder() {
   if (!canCheckout.value) return;
+  
+  // Проверка авторизации
+  const userStr = localStorage.getItem('user');
+  if (!userStr) {
+    errorMessage.value = 'Для оформления заказа необходимо авторизоваться';
+    setTimeout(() => {
+      router.push('/login');
+    }, 2000);
+    return;
+  }
+  
+  const user = JSON.parse(userStr);
+  
   submitting.value = true;
   successMessage.value = '';
   errorMessage.value = '';
@@ -153,6 +167,12 @@ async function submitOrder() {
   try {
     const certificates = items.value.filter((i) => i.type === 'certificate');
     const products = items.value.filter((i) => i.type === 'product');
+
+    // Получаем токен авторизации для отправки в заголовке
+    const authHeader = {
+      'Content-Type': 'application/json',
+      'x-user': encodeURIComponent(JSON.stringify(user))
+    };
 
     // Оформляем сертификаты через старое API (таблица certificate_orders)
     for (const cert of certificates) {
@@ -169,7 +189,7 @@ async function submitOrder() {
 
       const response = await fetch(`${API_URL}/api/certificates/order`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeader,
         body: JSON.stringify(orderData),
       });
 
@@ -183,7 +203,7 @@ async function submitOrder() {
     if (products.length > 0) {
       const response = await fetch(`${API_URL}/api/orders`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeader,
         body: JSON.stringify({
           phone: phone.value,
           total_price: products.reduce((s, i) => s + i.price * (i.quantity || 1), 0),
@@ -225,7 +245,7 @@ async function submitOrder() {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 160px var(--spacing-md) var(--spacing-xl);
+  padding: calc(var(--header-height) + var(--spacing-xl)) var(--spacing-md) var(--spacing-xl);
 }
 
 .cart-title {
@@ -591,7 +611,7 @@ async function submitOrder() {
 
 @media (max-width: 600px) {
   .container {
-    padding: 120px var(--spacing-sm) var(--spacing-lg);
+    padding: calc(var(--header-height) + 80px) var(--spacing-sm) var(--spacing-lg);
   }
 
   .cart-item {
